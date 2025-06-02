@@ -139,26 +139,17 @@
     }
 
     // Enhanced navigation functionality
-    function initializeNavigation() {
-        const menuToggle = document.querySelector(config.SELECTORS.MENU_TOGGLE);
-        const mainNav = document.querySelector(config.SELECTORS.MAIN_NAV_MENU);
 
-        if (!menuToggle) {
-            console.error("Menu toggle button (.menu-toggle) not found within #header-placeholder.");
-        }
-        if (!mainNav) {
-            console.error("Main navigation menu (.main-navigation-menu) not found within #navigation-placeholder.");
-        }
-
+    function initMenuToggle(config, mainNav, menuToggle) {
         if (menuToggle && mainNav) {
             menuToggle.addEventListener('click', function() {
                 const isExpanded = mainNav.classList.toggle(config.CSS_CLASSES.NAV_OPEN);
                 this.setAttribute('aria-expanded', isExpanded);
             });
         }
+    }
 
-        // Ensure dropdowns are also scoped if they are part of the loaded navigation
-        const dropdowns = document.querySelectorAll(config.SELECTORS.DROPDOWN);
+    function initDropdowns(config, dropdowns) {
         dropdowns.forEach(dropdown => {
             const trigger = dropdown.querySelector(config.SELECTORS.DROPDOWN_TRIGGER); // More specific selector
             const content = dropdown.querySelector(config.SELECTORS.DROPDOWN_CONTENT);
@@ -188,15 +179,18 @@
                 });
             }
         });
+    }
 
-        // Close menu/dropdowns when clicking outside
+    function initClickOutsideNav(config, mainNav, menuToggle, dropdowns) {
         document.addEventListener('click', function(event) {
             if (window.innerWidth <= config.BREAKPOINTS.MOBILE_NAV) {
                 // Close mobile nav if click is outside
                 if (mainNav && mainNav.classList.contains(config.CSS_CLASSES.NAV_OPEN)) {
                     if (!mainNav.contains(event.target) && !menuToggle.contains(event.target)) {
                         mainNav.classList.remove(config.CSS_CLASSES.NAV_OPEN);
-                        menuToggle.setAttribute('aria-expanded', 'false');
+                        if (menuToggle) { // Ensure menuToggle exists before setting attribute
+                            menuToggle.setAttribute('aria-expanded', 'false');
+                        }
                     }
                 }
 
@@ -207,7 +201,9 @@
                     if (content && content.classList.contains(config.CSS_CLASSES.DROPDOWN_OPEN)) {
                         if (!dropdown.contains(event.target)) {
                             content.classList.remove(config.CSS_CLASSES.DROPDOWN_OPEN);
-                            trigger.setAttribute('aria-expanded', 'false');
+                            if (trigger) { // Ensure trigger exists
+                                trigger.setAttribute('aria-expanded', 'false');
+                            }
                         }
                     }
                 });
@@ -215,26 +211,56 @@
         });
     }
 
+    function initializeNavigation() {
+        const menuToggle = document.querySelector(config.SELECTORS.MENU_TOGGLE);
+        const mainNav = document.querySelector(config.SELECTORS.MAIN_NAV_MENU);
+        const dropdowns = document.querySelectorAll(config.SELECTORS.DROPDOWN);
+
+        if (!menuToggle) {
+            console.error("Menu toggle button (.menu-toggle) not found within #header-placeholder.");
+        }
+        if (!mainNav) {
+            console.error("Main navigation menu (.main-navigation-menu) not found within #navigation-placeholder.");
+        }
+        // No error needed for dropdowns, as it might be empty if no dropdowns are used.
+
+        initMenuToggle(config, mainNav, menuToggle);
+        initDropdowns(config, dropdowns);
+        initClickOutsideNav(config, mainNav, menuToggle, dropdowns);
+    }
+
     // Accessibility enhancements
-    function initializeAccessibility() {
+
+    function initScreenReaderAnnouncer(config) {
         // Announce page changes for screen readers
         const announcer = document.createElement('div');
         announcer.setAttribute('role', 'status');
         announcer.setAttribute('aria-live', 'polite');
         announcer.setAttribute('aria-atomic', 'true');
-        announcer.className = config.CSS_CLASSES.SCREEN_READER_ONLY;
+        announcer.className = config.CSS_CLASSES.SCREEN_READER_ONLY; // Use config for class name
         document.body.appendChild(announcer);
+    }
 
+    function checkAccessibleLabels(config) {
         // Add keyboard navigation hints
+        // Consider making selector configurable if it varies often
         const interactiveElements = document.querySelectorAll('a, button, input, select, textarea');
         interactiveElements.forEach(el => {
             if (!el.getAttribute('aria-label') && !el.getAttribute('aria-labelledby')) {
                 const text = el.textContent || el.value || el.placeholder;
                 if (!text || text.trim() === '') {
-                    console.warn('Interactive element without accessible label:', el);
+                    // Check if the element is hidden or inside a hidden element
+                    if (el.offsetParent !== null) { // Basic check for visibility
+                         console.warn('Interactive element without accessible label:', el);
+                    }
                 }
             }
         });
+    }
+
+    function initializeAccessibility() {
+        initScreenReaderAnnouncer(config);
+        checkAccessibleLabels(config);
     }
 
     // Initialize analytics (placeholder)
