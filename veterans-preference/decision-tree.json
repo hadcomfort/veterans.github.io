@@ -113,7 +113,6 @@
         "questionText": "When did you serve on active duty?",
         "helpText": "Select all periods that apply to your service.",
         "explanationText": "Veterans' Preference eligibility often depends on service during specific wartime periods, in campaigns or expeditions for which a medal was awarded, or for a minimum duration (e.g., 180 consecutive days). Certain preference types are tied to these service periods.",
-        "multiSelect": true,
         "answers": [
             {
                 "answerText": "During a war, campaign, or expedition",
