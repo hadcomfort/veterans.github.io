@@ -1,699 +1,41 @@
 // Veterans' Preference Interactive Tool Logic
+// This script is wrapped in an IIFE (Immediately Invoked Function Expression)
+// to create a private scope, preventing naming conflicts with other scripts.
 (function() {
     'use strict';
 
-    // State management
+    // Manages the overall state of the interactive tool.
     const state = {
-        currentQuestionId: null,
-        history: [],
-        answers: {},
-        totalSteps: 0,
-        currentStep: 0
+        currentQuestionId: null, // ID of the question currently displayed to the user.
+        history: [],             // Array of question IDs, tracks the user's path through the tool for "back" functionality.
+        answers: {},             // Object storing the user's answers, keyed by question ID.
+        totalSteps: 0,           // Estimated total number of steps/questions to reach a conclusion.
+        currentStep: 0           // Current step number the user is on, for progress tracking.
     };
 
-    // Decision tree structure
-    const vetPreferenceTree = {
-        'START': {
-            id: 'START',
-            questionText: 'Are you seeking information about Veterans\' Preference for yourself or someone else?',
-            answers: [
-                {
-                    answerText: 'For myself (I am a veteran or current service member)',
-                    nextQuestionId: 'VETERAN_STATUS'
-                },
-                {
-                    answerText: 'For a family member',
-                    nextQuestionId: 'FAMILY_RELATIONSHIP'
-                },
-                {
-                    answerText: 'I am an HR professional seeking general information',
-                    resultOutcome: {
-                        type: 'info',
-                        title: 'HR Professional Resources',
-                        description: 'As an HR professional, you have access to comprehensive resources.',
-                        additionalInfo: [
-                            'Review the complete OPM Vet Guide for HR Professionals',
-                            'Consult agency-specific policies',
-                            'Contact OPM for specific case guidance'
-                        ],
-                        opmLinks: [
-                            {
-                                text: 'OPM Vet Guide for HR Professionals',
-                                url: 'https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/'
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
+    // Holds the decision tree data, loaded asynchronously from a JSON file.
+    let vetPreferenceTree = {};
 
-        'VETERAN_STATUS': {
-            id: 'VETERAN_STATUS',
-            questionText: 'What is your current military service status?',
-            answers: [
-                {
-                    answerText: 'Discharged/Separated veteran',
-                    nextQuestionId: 'DISCHARGE_TYPE'
-                },
-                {
-                    answerText: 'Current active duty service member',
-                    nextQuestionId: 'ACTIVE_DUTY_STATUS'
-                },
-                {
-                    answerText: 'Retired military',
-                    nextQuestionId: 'RETIREMENT_TYPE'
-                },
-                {
-                    answerText: 'Current Reserve or National Guard member',
-                    nextQuestionId: 'RESERVE_STATUS'
-                }
-            ]
-        },
-
-        'DISCHARGE_TYPE': {
-            id: 'DISCHARGE_TYPE',
-            questionText: 'What type of discharge did you receive from military service?',
-            helpText: 'Your discharge characterization is shown on your DD-214 or equivalent discharge documentation.',
-            answers: [
-                {
-                    answerText: "Honorable or General (and I specifically want to check for Sole Survivorship Preference first)",
-                    nextQuestionId: "SSP_DATE_CHECK"
-                },
-                {
-                    answerText: 'Honorable',
-                    nextQuestionId: 'SERVICE_DATES'
-                },
-                {
-                    answerText: 'General (Under Honorable Conditions)',
-                    nextQuestionId: 'SERVICE_DATES'
-                },
-                {
-                    answerText: 'Other Than Honorable (OTH)',
-                    resultOutcome: {
-                        type: 'not-eligible',
-                        title: 'Not Eligible for Veterans\' Preference',
-                        description: 'Veterans\' Preference requires an honorable or general discharge.',
-                        additionalInfo: [
-                            'You may be able to upgrade your discharge through a military discharge review board',
-                            'Some VA benefits may still be available depending on the circumstances'
-                        ],
-                        opmLinks: [
-                            {
-                                text: 'Character of Discharge Requirements',
-                                url: 'https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/#discharge'
-                            }
-                        ]
-                    }
-                },
-                {
-                    answerText: 'Bad Conduct or Dishonorable',
-                    resultOutcome: {
-                        type: 'not-eligible',
-                        title: 'Not Eligible for Veterans\' Preference',
-                        description: 'Veterans\' Preference is not available with a bad conduct or dishonorable discharge.',
-                        additionalInfo: [
-                            'Discharge upgrades may be possible in limited circumstances',
-                            'Consult with a Veterans Service Organization for assistance'
-                        ]
-                    }
-                },
-                {
-                    answerText: 'Uncharacterized or Entry Level Separation',
-                    nextQuestionId: 'ENTRY_LEVEL_SERVICE'
-                }
-            ]
-        },
-
-        'SERVICE_DATES': {
-            id: 'SERVICE_DATES',
-            questionText: 'When did you serve on active duty?',
-            helpText: 'Select all periods that apply to your service.',
-            multiSelect: true,
-            answers: [
-                {
-                    answerText: 'During a war, campaign, or expedition',
-                    nextQuestionId: 'DISABILITY_STATUS'
-                },
-                {
-                    answerText: 'Served at least 180 consecutive days, any part after 9/11/80',
-                    nextQuestionId: 'DISABILITY_STATUS'
-                },
-                {
-                    answerText: 'Only during peacetime before 9/11/80',
-                    resultOutcome: {
-                        type: 'not-eligible',
-                        title: 'Not Eligible for Veterans\' Preference',
-                        description: 'Peacetime service before September 11, 1980 does not qualify for Veterans\' Preference unless you have a service-connected disability.',
-                        additionalInfo: [
-                            'You may qualify if you have a service-connected disability',
-                            'Consider applying for VA disability compensation if you have service-related conditions'
-                        ]
-                    }
-                },
-                {
-                    answerText: 'Gulf War (8/2/90 to 1/2/92)',
-                    nextQuestionId: 'DISABILITY_STATUS'
-                },
-                {
-                    answerText: 'Operation Enduring Freedom/Operation Iraqi Freedom',
-                    nextQuestionId: 'DISABILITY_STATUS'
-                }
-            ]
-        },
-
-        'DISABILITY_STATUS': {
-            id: 'DISABILITY_STATUS',
-            questionText: 'Do you have a service-connected disability?',
-            helpText: 'A service-connected disability is one that the VA has determined was caused or aggravated by your military service.',
-            answers: [
-                {
-                    answerText: 'Yes, rated 30% or more',
-                    nextQuestionId: 'DISABILITY_TYPE_30'
-                },
-                {
-                    answerText: 'Yes, rated 10% or more but less than 30%',
-                    resultOutcome: {
-                        type: 'eligible-10-point',
-                        title: '10-Point Preference Eligible (CP)',
-                        description: 'You appear to be eligible for 10-point compensable preference.',
-                        requiredDocuments: [
-                            'DD-214 or equivalent discharge documentation',
-                            'VA letter showing disability percentage',
-                            'SF-15 Application for 10-Point Veteran Preference'
-                        ],
-                        opmLinks: [
-                            {
-                                text: '10-Point Preference Information',
-                                url: 'https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/#10point'
-                            }
-                        ]
-                    }
-                },
-                {
-                    answerText: 'Yes, but less than 10%',
-                    resultOutcome: {
-                        type: 'eligible-5-point',
-                        title: '5-Point Preference Eligible (TP)',
-                        description: 'You appear to be eligible for 5-point preference based on your military service.',
-                        requiredDocuments: [
-                            'DD-214 or equivalent discharge documentation'
-                        ],
-                        opmLinks: [
-                            {
-                                text: '5-Point Preference Information',
-                                url: 'https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/#5point'
-                            }
-                        ]
-                    }
-                },
-                {
-                    answerText: 'No service-connected disability',
-                    resultOutcome: {
-                        type: 'eligible-5-point',
-                        title: '5-Point Preference Eligible (TP)',
-                        description: 'Based on your qualifying military service, you appear to be eligible for 5-point preference.',
-                        requiredDocuments: [
-                            'DD-214 or equivalent discharge documentation'
-                        ],
-                        opmLinks: [
-                            {
-                                text: '5-Point Preference Information',
-                                url: 'https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/#5point'
-                            }
-                        ]
-                    }
-                },
-                {
-                    answerText: 'Purple Heart recipient',
-                    resultOutcome: {
-                        type: 'eligible-10-point',
-                        title: '10-Point Preference Eligible (CPS)',
-                        description: 'As a Purple Heart recipient, you are eligible for 10-point preference.',
-                        requiredDocuments: [
-                            'DD-214 showing Purple Heart award',
-                            'SF-15 Application for 10-Point Veteran Preference'
-                        ],
-                        opmLinks: [
-                            {
-                                text: '10-Point Preference for Purple Heart',
-                                url: 'https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/#purpleheart'
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-
-        'FAMILY_RELATIONSHIP': {
-            id: 'FAMILY_RELATIONSHIP',
-            questionText: 'What is your relationship to the veteran?',
-            helpText: 'Certain family members may be eligible for "derivative preference" based on the veteran\'s service.',
-            answers: [
-                {
-                    answerText: 'Spouse',
-                    nextQuestionId: 'SPOUSE_ELIGIBILITY'
-                },
-                {
-                    answerText: 'Mother',
-                    nextQuestionId: 'MOTHER_ELIGIBILITY'
-                },
-                {
-                    answerText: 'Child',
-                    resultOutcome: {
-                        type: 'not-eligible',
-                        title: 'Not Eligible for Derivative Preference',
-                        description: 'Children of veterans are not eligible for derivative preference. Only spouses and mothers of certain veterans qualify.',
-                        additionalInfo: [
-                            'The veteran themselves may be eligible for preference',
-                            'Other veteran family benefits may be available through VA'
-                        ]
-                    }
-                },
-                {
-                    answerText: 'Other family member',
-                    resultOutcome: {
-                        type: 'not-eligible',
-                        title: 'Not Eligible for Derivative Preference',
-                        description: 'Only spouses and mothers of certain disabled or deceased veterans are eligible for derivative preference.',
-                        additionalInfo: [
-                            'The veteran themselves should apply for their own preference',
-                            'Check with VA for other family member benefits'
-                        ]
-                    }
-                }
-            ]
-        },
-
-        'SPOUSE_ELIGIBILITY': {
-            id: 'SPOUSE_ELIGIBILITY',
-            questionText: 'What is the veteran\'s current status?',
-            helpText: 'Spouses may be eligible for derivative preference under specific circumstances.',
-            answers: [
-                {
-                    answerText: 'Living veteran with 100% service-connected disability',
-                    nextQuestionId: 'SPOUSE_UNEMPLOYABILITY'
-                },
-                {
-                    answerText: 'Deceased veteran (died in service or from service-connected disability during qualifying periods/campaigns OR was 100% P&T disabled at time of death)',
-                    resultOutcome: {
-                        type: 'eligible-10-point-derivative',
-                        title: '10-Point Derivative Preference Eligible (XP - Widow/Widower)',
-                        description: 'As the unremarried spouse of a qualifying deceased veteran, you may be eligible for 10-point derivative preference.',
-                        requiredDocuments: [
-                            'Marriage certificate',
-                            'Veteran\'s DD-214 (or equivalent)',
-                            'Veteran\'s death certificate',
-                            'Documentation showing death was service-connected OR veteran was 100% P&T disabled (e.g., VA letter)',
-                            'SF-15 Application for 10-Point Veteran Preference'
-                        ],
-                        additionalInfo: [
-                            'You generally remain eligible unless you remarry (some exceptions apply).',
-                            'The veteran must have served during specific periods or campaigns if death was not in service or due to service-connection.'
-                        ],
-                        opmLinks: [
-                            {
-                                text: 'Derivative Preference Information',
-                                url: 'https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/#derivative'
-                            }
-                        ]
-                    }
-                },
-                {
-                    answerText: 'Living veteran with less than 100% disability, or veteran\'s death was not service-connected and they were not 100% disabled.',
-                    resultOutcome: {
-                        type: 'not-eligible',
-                        title: 'Not Eligible for Derivative Preference as Spouse',
-                        description: 'Spouses of living veterans are generally eligible only if the veteran has a 100% permanent and total service-connected disability and is unemployable. For deceased veterans, specific conditions regarding their service or cause of death must be met.',
-                        additionalInfo: [
-                            'The veteran themselves may be eligible for preference.',
-                            'Check if the veteran\'s disability rating may increase or if other conditions for derivative preference apply.'
-                        ]
-                    }
-                },
-                {
-                    answerText: 'Veteran is Missing in Action (MIA), captured, or forcibly detained by a foreign power.',
-                    resultOutcome: {
-                        type: 'eligible-10-point-derivative', // This is complex but often treated as XP
-                        title: 'Potential 10-Point Derivative Preference (XP - Spouse of MIA/Captured)',
-                        description: 'As the spouse of a service member in MIA/Captured status, you may be eligible for 10-point preference.',
-                        requiredDocuments: [
-                            'Marriage certificate',
-                            'Official documentation of MIA/Captured status (e.g., from DoD)',
-                            'SF-15 Application for 10-Point Veteran Preference'
-                        ],
-                        additionalInfo: [
-                            'This is a special category of derivative preference.',
-                            'Consult with HR or a Veterans Service Officer for detailed guidance.'
-                        ],
-                        opmLinks: [
-                            {
-                                text: 'Derivative Preference Information',
-                                url: 'https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/#derivative'
-                            }
-                        ]
-                    }
-                }
-            ]
-        },
-
-        'ACTIVE_DUTY_STATUS': {
-            id: 'ACTIVE_DUTY_STATUS',
-            questionText: 'Are you expected to be discharged or released from active duty service under honorable conditions within the next 120 days?',
-            answers: [
-                {
-                    answerText: 'Yes, and I can provide a certification.',
-                    resultOutcome: {
-                        type: 'info', // VOW Act provides early consideration, actual preference type depends on underlying eligibility
-                        title: 'Potential Eligibility under VOW Act',
-                        description: 'Under the VOW to Hire Heroes Act, you may receive early consideration for federal jobs. Your actual preference type (0, 5, or 10 points) will depend on your full service record once discharged.',
-                        requiredDocuments: [
-                            'Certification from the armed forces (letterhead, service dates, expected discharge/release date, character of service)',
-                            'Upon separation, obtain DD-214 and SF-15 (if claiming 10-point preference)'
-                        ],
-                        additionalInfo: [
-                            'Agencies must accept your certification in lieu of a DD-214 for application purposes.',
-                            'You will need to provide your DD-214 to finalize preference before appointment.',
-                            'Consider your likely eligibility based on service dates and any disability to determine if you\'d be 0-point SSP, 5-point, or 10-point eligible.'
-                        ],
-                        opmLinks: [
-                            { text: 'VOW Act Information (within Vet Guide)', url: 'https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/' } // Placeholder, needs specific link if available
-                        ]
-                        // Consider linking to SERVICE_DATES or DISABILITY_STATUS for self-assessment of underlying preference.
-                    }
-                },
-                {
-                    answerText: 'No, I am not within 120 days of separation OR I cannot provide certification.',
-                    resultOutcome: {
-                        type: 'info',
-                        title: 'Re-assess When Eligible',
-                        description: 'To be considered under the VOW Act, you need to be within 120 days of separation and provide a certification. Otherwise, you generally need your DD-214 to claim preference after separation.',
-                        additionalInfo: [
-                            'Check back when you are within 120 days of your expected separation date.',
-                            'Ensure you request a certification letter from your command well in advance.'
-                        ]
-                    }
-                },
-                {
-                    answerText: 'I am on terminal leave.',
-                    resultOutcome: {
-                        type: 'info', // Similar to VOW Act, can apply, preference type depends on underlying eligibility
-                        title: 'Eligible to Apply While on Terminal Leave',
-                        description: 'Service members on terminal leave can apply for federal jobs and may receive preference. Your actual preference type (0, 5, or 10 points) will depend on your full service record.',
-                        requiredDocuments: [
-                            'Official documentation of terminal leave status and expected honorable discharge date.',
-                            'DD-214 upon final separation.',
-                            'SF-15 (if claiming 10-point preference) upon separation.'
-                        ],
-                        additionalInfo: [
-                            'This allows you to start the job search process before your official separation date.',
-                            'Consider your likely eligibility based on service dates and any disability to determine if you\'d be 0-point SSP, 5-point, or 10-point eligible.'
-                        ]
-                    }
-                }
-            ]
-        },
-
-        'RETIREMENT_TYPE': {
-            id: 'RETIREMENT_TYPE',
-            questionText: 'Regarding your military retirement, which of these is true?',
-            answers: [
-                {
-                    answerText: 'Retired at rank of Major, Lieutenant Commander, or higher AND retirement was NOT due to a service-connected disability.',
-                    resultOutcome: {
-                        type: 'not-eligible-unless-disabled', // Special type to indicate conditional eligibility
-                        title: 'Generally Not Eligible for Preference in Appointment (Retired Senior Officer)',
-                        description: 'Military retirees at the rank of Major, Lieutenant Commander, or higher are generally not eligible for preference in appointments unless they are disabled veterans.',
-                        additionalInfo: [
-                            'If you have a service-connected disability, you may still be eligible for preference. You can restart this tool and indicate your disability status.',
-                            'This restriction does not apply to preference in Reduction in Force (RIF) if you meet other RIF preference criteria.'
-                        ],
-                        // Option to loop to DISABILITY_STATUS or restart:
-                        // nextQuestionId: 'DISABILITY_STATUS' // Or provide a button to restart and choose disabled path
-                    }
-                },
-                {
-                    answerText: 'Retired at rank below Major, Lieutenant Commander, OR retired at a higher rank DUE to a service-connected disability.',
-                    nextQuestionId: 'SERVICE_DATES' // Proceed to determine underlying preference based on service
-                },
-                {
-                    answerText: 'Receiving retired pay as a Reservist at age 60 (or will be).',
-                    nextQuestionId: 'SERVICE_DATES' // Generally treated like other retirees for preference, underlying service determines type.
-                }
-            ]
-        },
-
-        'RESERVE_STATUS': {
-            id: 'RESERVE_STATUS',
-            questionText: 'As a current Reserve or National Guard member, have you been called to active duty (not for training) under Title 10 or Title 32 orders for a period that would qualify you for preference (e.g., during a war/campaign, or for more than 180 consecutive days, etc.)?',
-            answers: [
-                {
-                    answerText: 'Yes, and I have been discharged from that period of active duty under honorable conditions.',
-                    nextQuestionId: 'DISCHARGE_TYPE' // Evaluate that specific period of service
-                },
-                {
-                    answerText: 'Yes, I am currently on such active duty.',
-                    nextQuestionId: 'ACTIVE_DUTY_STATUS' // Refer to active duty rules (VOW Act, etc.)
-                },
-                {
-                    answerText: 'No, my active duty was only for training OR I haven\'t had qualifying active service periods.',
-                    resultOutcome: {
-                        type: 'info',
-                        title: 'Preference Based on Qualifying Active Duty',
-                        description: 'Generally, active duty for training as a Reservist/Guard member does not confer preference unless you incurred a service-connected disability during that training or were activated under specific Title 10/32 authorities for qualifying periods (e.g., war, campaign, >180 days non-training).',
-                        additionalInfo: [
-                            'If you have other prior periods of qualifying active service as a veteran (not Reserve/Guard training), restart the tool and use that service.',
-                            'If you incurred a disability during training, you might be eligible for 10-point preference. Restart and select the disability path.',
-                            'Otherwise, you may not be eligible for preference at this time based on Reserve/Guard service alone.'
-                        ]
-                    }
-                }
-            ]
-        },
-
-        'ENTRY_LEVEL_SERVICE': {
-            id: 'ENTRY_LEVEL_SERVICE',
-            questionText: "Was your 'Uncharacterized' or 'Entry Level Separation' (ELS) due to a service-connected disability incurred during your brief period of service?",
-            answers: [
-                {
-                    answerText: 'Yes.',
-                    resultOutcome: {
-                        type: 'complex',
-                        title: 'Potentially Eligible - Complex Case (ELS with Disability)',
-                        description: 'Eligibility in this case is complex. An Entry Level Separation due to a service-connected disability incurred during that service might qualify you for 10-point preference.',
-                        requiredDocuments: [
-                            'DD-214 or equivalent separation document.',
-                            'SF-15 Application for 10-Point Veteran Preference.',
-                            'Official documentation of the service-connected disability and its incurrence during your service (e.g., VA rating decision, military medical records).'
-                        ],
-                        additionalInfo: [
-                            'This is a less common scenario and requires clear documentation.',
-                            'Be prepared to provide detailed evidence to the hiring agency.',
-                            'Consult with HR or a Veterans Service Officer for guidance.'
-                        ],
-                        opmLinks: [
-                             { text: 'Character of Discharge (Vet Guide)', url: 'https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/' } // Placeholder
-                        ]
-                    }
-                },
-                {
-                    answerText: 'No.',
-                    resultOutcome: {
-                        type: 'not-eligible',
-                        title: 'Generally Not Eligible (ELS without Disability)',
-                        description: "Uncharacterized or Entry Level Separations generally do not qualify for Veterans' Preference unless proven to be due to a service-connected disability incurred during that service period.",
-                        additionalInfo: [
-                            'If you believe a disability was incurred, you would need to pursue a claim with the VA and obtain documentation.'
-                        ]
-                    }
-                }
-            ]
-        },
-
-        'DISABILITY_TYPE_30': { // This node follows 'Yes, rated 30% or more' from DISABILITY_STATUS
-            id: 'DISABILITY_TYPE_30',
-            questionText: 'Is your service-connected disability rated by the VA as 30% or more?', // This is a confirmation step
-            answers: [
-                {
-                    answerText: 'Yes, 30% or more.', // Confirms path for CPS
-                    resultOutcome: {
-                        type: 'eligible-10-point-cps',
-                        title: '10-Point Preference Eligible (CPS - 30% or More Disabled)',
-                        description: 'You appear to be eligible for 10-point (CPS) preference due to a service-connected disability rated at 30% or more.',
-                        requiredDocuments: [
-                            'DD-214 or equivalent discharge documentation',
-                            'VA letter confirming current disability rating of 30% or more',
-                            'SF-15 Application for 10-Point Veteran Preference'
-                        ],
-                        opmLinks: [
-                            {
-                                text: '10-Point Preference (CPS)',
-                                url: 'https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/#10point' // General 10-point link
-                            }
-                        ]
-                    }
-                }
-                // No "No" answer here as the previous question already established 30% or more.
-                // If there was a need to distinguish permanent vs. temporary 30%+, more questions would be needed.
-                // For now, this directly leads to CPS. XP (disability) without 30% is handled by other paths.
-            ]
-        },
-
-        'MOTHER_ELIGIBILITY': {
-            id: 'MOTHER_ELIGIBILITY',
-            questionText: 'Regarding the veteran (your child), which of these applies?',
-            answers: [
-                {
-                    answerText: 'My veteran child died under honorable conditions while on active duty during a war, qualifying campaign/expedition, or specific peacetime periods OR is 100% permanently and totally disabled due to service.',
-                    nextQuestionId: 'MOTHER_MARITAL_STATUS'
-                },
-                {
-                    answerText: 'None of the above apply to my veteran child.',
-                    resultOutcome: {
-                        type: 'not-eligible',
-                        title: 'Not Eligible for Derivative Preference as Mother',
-                        description: 'To be eligible as a mother, your veteran child must have died under specific conditions (e.g., in service during wartime/campaign, or from service-connected causes if 100% P&T disabled) or be currently living with a 100% permanent and total service-connected disability.',
-                        opmLinks: [
-                            { text: 'Derivative Preference for Mothers', url: 'https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/#derivative' }
-                        ]
-                    }
-                }
-            ]
-        },
-
-        'MOTHER_MARITAL_STATUS': {
-            id: 'MOTHER_MARITAL_STATUS',
-            questionText: 'What is your current marital status and living situation related to the veteran\'s father or your current husband?',
-            answers: [
-                { // Combines several conditions from OPM guide for simplicity
-                    answerText: 'I am widowed (from veteran\'s father or subsequent marriage) and have not remarried; OR I am divorced/separated from the veteran\'s father and have not remarried; OR I am married and living with my husband (veteran\'s father or remarried) who is totally and permanently disabled.',
-                    resultOutcome: {
-                        type: 'eligible-10-point-derivative',
-                        title: '10-Point Derivative Preference Eligible (Mother - XP)',
-                        description: 'Based on your veteran child\'s service/disability and your current status, you may be eligible for 10-point derivative preference as a mother.',
-                        requiredDocuments: [
-                            'Your birth certificate (showing relationship to veteran, if name changed documentation of that too)',
-                            'Veteran\'s DD-214 (or equivalent)',
-                            'Veteran\'s death certificate (if applicable) or VA letter confirming 100% P&T disability',
-                            'Documentation of your marital status (e.g., marriage cert, divorce decree, husband\'s death cert)',
-                            'If applicable, documentation of husband\'s total and permanent disability',
-                            'SF-15 Application for 10-Point Veteran Preference'
-                        ],
-                        opmLinks: [
-                            { text: 'Derivative Preference for Mothers', url: 'https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/#derivative' }
-                        ]
-                    }
-                },
-                {
-                    answerText: 'None of the above accurately describe my situation.',
-                    resultOutcome: {
-                        type: 'not-eligible',
-                        title: 'Not Eligible for Derivative Preference as Mother',
-                        description: 'Your current marital or living situation, based on the OPM guidelines, does not appear to meet the specific requirements for derivative preference as a mother.',
-                        opmLinks: [
-                            { text: 'Derivative Preference for Mothers', url: 'https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/#derivative' }
-                        ]
-                    }
-                }
-            ]
-        },
-
-        'SPOUSE_UNEMPLOYABILITY': { // Follow-up to SPOUSE_ELIGIBILITY for "Living veteran with 100% service-connected disability"
-            id: 'SPOUSE_UNEMPLOYABILITY',
-            questionText: 'Is the living veteran, due to their 100% service-connected disability, unable to work in their usual occupation?',
-            answers: [
-                {
-                    answerText: 'Yes, they are unable to work in their usual occupation due to the disability.',
-                    resultOutcome: {
-                        type: 'eligible-10-point-derivative',
-                        title: '10-Point Derivative Preference Eligible (Spouse - XP)',
-                        description: 'As the spouse of a living veteran who is 100% service-connected disabled and unable to work in their usual occupation due to that disability, you may be eligible for 10-point derivative preference.',
-                        requiredDocuments: [
-                            'Marriage certificate',
-                            'Veteran\'s DD-214 (or equivalent)',
-                            'VA letter confirming veteran\'s 100% permanent and total service-connected disability',
-                            'Evidence the veteran is unable to work in their usual occupation due to the disability (e.g., VA rating of individual unemployability, or other documentation specified by OPM/agency)',
-                            'SF-15 Application for 10-Point Veteran Preference'
-                        ],
-                        opmLinks: [
-                             { text: 'Derivative Preference for Spouses', url: 'https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/#derivative' }
-                        ]
-                    }
-                },
-                {
-                    answerText: 'No, they are still able to work OR their inability to work is not due to the service-connected disability.',
-                    resultOutcome: {
-                        type: 'not-eligible',
-                        title: 'Not Eligible for Derivative Preference as Spouse',
-                        description: 'To be eligible as a spouse of a living 100% disabled veteran, the veteran must be unable to work in their usual occupation specifically because of the service-connected disability.',
-                        opmLinks: [
-                             { text: 'Derivative Preference for Spouses', url: 'https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/#derivative' }
-                        ]
-                    }
-                }
-            ]
-        }
-        // Additional nodes would continue here...
-
-        // SSP Outcome Definition
-        sspEligibleOutcome: {
-            type: "info-0-point", // May need a new CSS class for distinct styling if desired
-            title: "0-Point Sole Survivorship Preference (SSP) Potentially Eligible",
-            description: "Based on your responses, you may be eligible for 0-point Sole Survivorship Preference (SSP). This preference does not add points to your score but provides other significant advantages in federal hiring.",
-            additionalInfo: [
-                "You are entitled to be listed ahead of non-preference eligibles with the same examination score or in the same quality category.",
-                "You have the same pass-over rights as other preference eligibles.",
-                "Your experience in the armed forces can be credited towards meeting qualification requirements for Federal jobs.",
-                "Eligibility requires discharge/release after August 29, 2008, due to a sole survivorship discharge."
-            ],
-            requiredDocuments: [
-                "DD Form 214 (Certificate of Release or Discharge from Active Duty) that indicates a sole survivorship discharge.",
-                "SF-15, Application for 10-Point Veteran Preference (While SSP is 0-point, this form is often used to formally claim any veteran preference status; follow agency instructions).",
-                "If requested by the agency, documentation related to the qualifying family member's service and status."
-            ],
-            opmLinks: [
-                { text: "OPM Vet Guide - Types of Preference (see 0-point SSP)", url: "https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/" }
-            ]
-        },
-
-        // SSP Path Starts Here
-        SSP_DATE_CHECK: {
-            id: 'SSP_DATE_CHECK',
-            questionText: "Was your discharge or release from active duty on or after August 29, 2008?",
-            answers: [
-                {
-                    answerText: 'Yes',
-                    nextQuestionId: 'SSP_REASON_CHECK'
-                },
-                {
-                    answerText: 'No',
-                    nextQuestionId: 'SERVICE_DATES' // If too early for SSP, proceed to check other preference types
-                }
-            ]
-        },
-
-        SSP_REASON_CHECK: {
-            id: 'SSP_REASON_CHECK',
-            questionText: "Was the reason for this discharge specifically a 'sole survivorship discharge'?",
-            helpText: "This type of discharge is granted if you are the only surviving child in a family where a parent or sibling(s) served in the armed forces and suffered certain casualties (e.g., death, MIA, 100% disability).",
-            answers: [
-                {
-                    answerText: 'Yes',
-                    resultOutcome: 'sspEligibleOutcome' // Reference the defined outcome
-                },
-                {
-                    answerText: 'No',
-                    nextQuestionId: 'SERVICE_DATES' // If not an SSP discharge, proceed to check other preference types
-                }
-            ]
-        }
-    };
-
-    // DOM elements
+    // Caches frequently accessed DOM elements.
     let elements = {};
 
-    // Initialize the tool
-    function init() {
-        // Get DOM elements
+    /**
+     * Initializes the interactive tool.
+     * This function performs several key setup tasks:
+     * 1. Caches essential DOM elements for later use.
+     * 2. Asynchronously fetches the decision tree data from a JSON file.
+     * 3. If data fetching is successful:
+     *    - Stores the decision tree in `vetPreferenceTree`.
+     *    - Sets up event listeners for UI elements that depend on the tree data (e.g., starting the tool).
+     *    - Calculates the total number of steps for the progress bar.
+     * 4. If data fetching fails:
+     *    - Logs the error to the console.
+     *    - Displays an error message to the user.
+     *    - Disables the tool to prevent further interaction.
+     * 5. Sets up event listeners for UI elements that do not depend on the tree data (e.g., restart, back, print).
+     */
+    async function init() {
+        // Cache DOM elements for quick access.
         elements = {
             disclaimer: document.querySelector('.tool-disclaimer'),
             acceptButton: document.getElementById('accept-disclaimer'),
@@ -701,19 +43,69 @@
             questionArea: document.getElementById('question-area'),
             answersArea: document.getElementById('answers-area'),
             resultArea: document.getElementById('result-area'),
-            progressBar: document.querySelector('.progress-bar'),
-            currentStep: document.getElementById('current-step'),
-            totalSteps: document.getElementById('total-steps'),
-            backButton: document.getElementById('back-button'),
-            restartButton: document.getElementById('restart-button'),
-            printButton: document.getElementById('print-button')
+            progressBar: document.querySelector('.progress-bar'), // The progress bar element.
+            currentStep: document.getElementById('current-step'),   // Element displaying the current step number.
+            totalSteps: document.getElementById('total-steps'),     // Element displaying the total estimated steps.
+            backButton: document.getElementById('back-button'),     // The "Back" button.
+            restartButton: document.getElementById('restart-button'), // The "Restart" button.
+            printButton: document.getElementById('print-button')     // The "Print" button.
         };
 
-        // Set up event listeners
-        if (elements.acceptButton) {
-            elements.acceptButton.addEventListener('click', startTool);
+        // Asynchronously fetch the decision tree data.
+        try {
+            const response = await fetch('veterans-preference/decision-tree.json');
+            if (!response.ok) {
+                // Handle HTTP errors (e.g., 404 Not Found, 500 Server Error).
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            vetPreferenceTree = await response.json(); // Parse the JSON response.
+
+            // Setup event listeners and perform initial calculations that depend on the decision tree.
+            if (elements.acceptButton) {
+                elements.acceptButton.addEventListener('click', startTool);
+            }
+
+            // Calculate and display the total number of steps for progress indication.
+            state.totalSteps = countTotalSteps(vetPreferenceTree); // Pass the loaded tree
+            if (elements.totalSteps) {
+                elements.totalSteps.textContent = state.totalSteps;
+            }
+
+            // Placeholder for any other initializations that might depend on the loaded tree.
+
+        } catch (error) {
+            // Catch errors from fetch (e.g., network issues) or JSON parsing.
+            console.error('Error loading decision tree:', error);
+            // Inform the user that the tool cannot be loaded.
+            if (elements.questionArea) {
+                // Use a more structured error display
+                elements.questionArea.innerHTML = `
+                    <div class="tool-error-message">
+                        <h2>Initialization Error</h2>
+                        <p>Could not load the decision tree data required for this tool to function.</p>
+                        <p>Please try refreshing the page. If the issue persists, the tool may be temporarily unavailable or there might be a network problem.</p>
+                    </div>`;
+                elements.questionArea.style.display = 'block'; // Ensure question area is visible for the error.
+            }
+            // Hide other parts of the tool interface that shouldn't be active.
+            if (elements.answersArea) elements.answersArea.style.display = 'none';
+            const toolControls = document.querySelector('.tool-controls'); // Specific selector if elements.toolControls is not defined yet or to be safe
+            if (toolControls) toolControls.style.display = 'none';
+            if (elements.progressBar) { // Assuming progressBar is the inner bar, hide its container
+                const progressContainer = document.querySelector('.tool-progress');
+                if (progressContainer) progressContainer.style.display = 'none';
+            }
+
+
+            // Disable the tool's start mechanism if data loading fails.
+            if (elements.acceptButton) {
+                elements.acceptButton.disabled = true;
+                elements.acceptButton.textContent = 'Tool Unavailable';
+            }
+            return; // Halt further initialization as the tool is not functional.
         }
 
+        // Setup event listeners for controls that are independent of the decision tree data.
         if (elements.restartButton) {
             elements.restartButton.addEventListener('click', restartTool);
         }
@@ -725,164 +117,395 @@
         if (elements.printButton) {
             elements.printButton.addEventListener('click', printResults);
         }
+    }
 
-        // Calculate total steps
-        state.totalSteps = countTotalSteps();
-        if (elements.totalSteps) {
-            elements.totalSteps.textContent = state.totalSteps;
+    /**
+     * Calculates the estimated total number of steps (questions) in the decision tree.
+     * This function traverses the `vetPreferenceTree` from the 'START' node to find the
+     * maximum depth, which is used as an estimate for the total steps in the progress bar.
+     * If the tree is not loaded, it returns a default value.
+     * @returns {number} The estimated maximum depth of the decision tree, or a default value.
+     */
+    function countTotalSteps(tree) {
+        if (!tree || Object.keys(tree).length === 0 || !tree['START']) {
+            return 1; // Default to 1 if tree is empty or START node is missing
         }
+
+        /**
+         * Recursive helper function to calculate the maximum depth from a given node.
+         * @param {string} nodeId - The ID of the current node.
+         * @param {object} currentTree - The decision tree.
+         * @param {Set<string>} visitedInPath - Set of node IDs visited in the current path (to detect cycles).
+         * @returns {number} The maximum depth from this node.
+         */
+        function getMaxDepth(nodeId, currentTree, visitedInPath) {
+            // Cycle detection: if we've seen this node in the current path, stop.
+            if (visitedInPath.has(nodeId)) {
+                console.warn(`Circular reference detected in countTotalSteps at nodeId: ${nodeId}`);
+                return 0; // Don't contribute to depth from this cyclic path.
+            }
+
+            const node = currentTree[nodeId];
+            // If node doesn't exist or it's a malformed node without answers (and not a result implicitly)
+            if (!node || !node.answers) {
+                // This path ends here. If it were a question, it would count as 1.
+                // If it's an outcome node (like sspEligibleOutcome referenced directly), it's not a question step.
+                // However, the logic counts question steps. If a node has no answers leading to nextQuestionId,
+                // it means this path ends after this question.
+                return 1; // Current node is a step, but no further question steps from here.
+            }
+
+            // Add current node to path
+            visitedInPath.add(nodeId);
+
+            let maxChildDepth = 0;
+            let hasNextQuestion = false;
+            node.answers.forEach(answer => {
+                if (answer.nextQuestionId) {
+                    hasNextQuestion = true;
+                    // Create a new Set for the recursive call to ensure visitedInPath is specific to each branch
+                    const depth = getMaxDepth(answer.nextQuestionId, currentTree, new Set(visitedInPath));
+                    if (depth > maxChildDepth) {
+                        maxChildDepth = depth;
+                    }
+                }
+                // If an answer leads directly to a resultOutcome, it doesn't add to depth of questions.
+            });
+
+            // If this node had answers, but none led to a nextQuestionId, it's effectively a leaf in terms of question depth.
+            // It counts as 1 for itself.
+            // If it has paths leading to further questions, add 1 (for current node) to the max depth found from its children.
+            return hasNextQuestion ? (1 + maxChildDepth) : 1;
+        }
+
+        return getMaxDepth('START', tree, new Set());
     }
 
-    // Count total possible steps in the tree
-    function countTotalSteps() {
-        // Updated approximation after adding new nodes. Max depth could be around 5-7 in complex paths.
-        // This is still an estimate for UI display.
-        return 17; // Increased from 10, then by 2 for SSP_DATE_CHECK and SSP_REASON_CHECK
-    }
-
-    // Start the tool after accepting disclaimer
+    /**
+     * Starts the interactive tool.
+     * This is typically called after the user accepts a disclaimer.
+     * It hides the disclaimer and shows the main tool interface, then displays the first question.
+     * It also checks if the decision tree has been loaded before proceeding.
+     */
     function startTool() {
+        // Ensure the decision tree is loaded before starting.
+        if (Object.keys(vetPreferenceTree).length === 0) {
+            console.error("Decision tree not loaded yet. Cannot start tool.");
+            // Optionally, inform the user if the tool is still loading.
+            if (elements.questionArea) {
+                elements.questionArea.innerHTML = `<p>The tool is still loading. Please wait a moment and try again.</p>`;
+            }
+            return;
+        }
+        // Hide disclaimer and show the main tool interface.
         elements.disclaimer.style.display = 'none';
         elements.toolInterface.style.display = 'block';
+        // Display the initial question.
         displayQuestion('START');
     }
 
-    // Display a question
+    /**
+     * Creates the HTML element for a given question.
+     * @param {object} question - The question object from the decision tree.
+     * @returns {HTMLElement} A div element containing the question's title and help text.
+     */
+    function createQuestionElement(question) {
+        const questionElement = document.createElement('div');
+        const questionTitle = document.createElement('h2');
+        questionTitle.textContent = question.questionText; // Set the question text.
+        questionElement.appendChild(questionTitle);
+
+        // Add help text if available for the question.
+        if (question.helpText) {
+            const helpTextElement = document.createElement('p');
+            helpTextElement.className = 'help-text'; // Apply styling for help text.
+            helpTextElement.textContent = question.helpText;
+            questionElement.appendChild(helpTextElement);
+        }
+
+        // Add "Explain this?" feature if explanationText exists
+        if (question.explanationText) {
+            const explanationButton = document.createElement('button');
+            explanationButton.className = 'explanation-toggle';
+            explanationButton.textContent = 'Explain this?';
+            explanationButton.setAttribute('aria-expanded', 'false');
+
+            const explanationId = `explanation-${question.id || Math.random().toString(36).substr(2, 9)}`;
+            explanationButton.setAttribute('aria-controls', explanationId);
+
+            const explanationDiv = document.createElement('div');
+            explanationDiv.className = 'explanation-content';
+            explanationDiv.id = explanationId;
+            // Sanitize or carefully construct HTML if explanationText can contain HTML.
+            // For simple text, textContent is safer. If HTML is needed, ensure it's from a trusted source.
+            // Assuming explanationText is simple text or safe HTML for this implementation.
+            explanationDiv.innerHTML = `<p>${question.explanationText.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>')}</p>`; // Basic formatting for newlines
+            explanationDiv.style.display = 'none'; // Initially hidden
+
+            explanationButton.addEventListener('click', () => {
+                const isExpanded = explanationButton.getAttribute('aria-expanded') === 'true';
+                explanationButton.setAttribute('aria-expanded', !isExpanded);
+                explanationDiv.style.display = isExpanded ? 'none' : 'block';
+            });
+
+            questionElement.appendChild(explanationButton);
+            questionElement.appendChild(explanationDiv);
+        }
+        return questionElement; // Return the complete question element.
+    }
+
+    /**
+     * Creates an HTML button element for a given answer.
+     * @param {object} answer - The answer object from the decision tree.
+     * @returns {HTMLButtonElement} A button element configured with the answer text and a click handler.
+     */
+    function createAnswerButton(answer) {
+        const button = document.createElement('button');
+        button.className = 'answer-option'; // Apply styling for answer buttons.
+        button.textContent = answer.answerText; // Set the button text.
+        // Set an event listener to handle the answer selection.
+        // The `handleAnswer` function will be called with the specific answer object when clicked.
+        button.addEventListener('click', () => handleAnswer(answer));
+        return button; // Return the configured button.
+    }
+
+    /**
+     * Displays a question and its possible answers to the user.
+     * @param {string} questionId - The ID of the question to display from the `vetPreferenceTree`.
+     */
     function displayQuestion(questionId) {
-        const question = vetPreferenceTree[questionId];
+        const question = vetPreferenceTree[questionId]; // Retrieve the question object from the tree.
+
+        // Error handling: if the question ID is invalid or not found.
         if (!question) {
-            console.error('Question not found:', questionId);
+            console.error(`Error: Question with ID "${questionId}" not found in decision tree.`);
+            displayCriticalError(`An error occurred while trying to load the question. Please restart the tool to try again.`);
             return;
         }
 
-        // Update state
+        // Update the tool's state with the current question and step.
         state.currentQuestionId = questionId;
+        // Increment current step, ensuring it doesn't exceed totalSteps.
         state.currentStep = Math.min(state.currentStep + 1, state.totalSteps);
 
-        // Update progress
-        updateProgress();
+        updateProgress(); // Update the visual progress bar.
 
-        // Clear previous content
+        // Clear the question and answers areas before displaying new content.
         elements.questionArea.innerHTML = '';
         elements.answersArea.innerHTML = '';
-        elements.resultArea.style.display = 'none';
+        elements.resultArea.style.display = 'none'; // Ensure result area is hidden.
 
-        // Display question
-        const questionHTML = `
-            <h2>${question.questionText}</h2>
-            ${question.helpText ? `<p class="help-text">${question.helpText}</p>` : ''}
-        `;
-        elements.questionArea.innerHTML = questionHTML;
+        // Create and display the question element.
+        const questionElement = createQuestionElement(question);
+        elements.questionArea.appendChild(questionElement);
 
-        // Display answers
-        question.answers.forEach((answer, index) => {
-            const button = document.createElement('button');
-            button.className = 'answer-option';
-            button.textContent = answer.answerText;
-            button.setAttribute('data-answer-index', index);
-            button.addEventListener('click', () => handleAnswer(answer));
-            elements.answersArea.appendChild(button);
+        // Create and display buttons for each answer.
+        question.answers.forEach(answer => {
+            const answerButton = createAnswerButton(answer);
+            elements.answersArea.appendChild(answerButton);
         });
 
-        // Update navigation
+        // Show or hide the "Back" button based on navigation history.
         elements.backButton.style.display = state.history.length > 0 ? 'inline-block' : 'none';
+
+        // Set focus to the question area for screen reader announcements and keyboard navigation.
+        elements.questionArea.focus();
     }
 
-    // Handle answer selection
+    /**
+     * Handles the user's selection of an answer.
+     * It records the answer, updates the navigation history, and then either
+     * displays the next question or shows the final result based on the answer.
+     * @param {object} answer - The answer object selected by the user.
+     */
     function handleAnswer(answer) {
-        // Save answer
+        // Record the user's answer for the current question.
         state.answers[state.currentQuestionId] = answer.answerText;
+        // Add the current question to history to enable "back" navigation.
         state.history.push(state.currentQuestionId);
 
+        // Determine the next step based on the selected answer.
         if (answer.nextQuestionId) {
+            // If there's a next question, display it.
             displayQuestion(answer.nextQuestionId);
         } else if (answer.resultOutcome) {
-            // Check if resultOutcome is a string ID (like for SSP) or an object
+            // If this answer leads to a result, display it.
+            // The resultOutcome can be a direct object or a string ID referencing a shared outcome in vetPreferenceTree.
             if (typeof answer.resultOutcome === 'string') {
-                displayResult(vetPreferenceTree[answer.resultOutcome]);
+                const resultNodeId = answer.resultOutcome;
+                const resultData = vetPreferenceTree[resultNodeId];
+                if (!resultData) {
+                    console.error(`Error: Result node with ID "${resultNodeId}" not found in decision tree.`);
+                    displayCriticalError(`An error occurred while trying to determine the outcome. Please restart the tool.`);
+                    return;
+                }
+                displayResult(resultData);
             } else {
+                // If resultOutcome is an object, pass it directly.
                 displayResult(answer.resultOutcome);
             }
         }
     }
 
-    // Display result
+    /**
+     * Displays a critical error message to the user, typically when the tool cannot proceed.
+     * @param {string} userMessage - The user-friendly message to display.
+     */
+    function displayCriticalError(userMessage) {
+        elements.questionArea.style.display = 'none';
+        elements.answersArea.style.display = 'none';
+
+        elements.resultArea.innerHTML = `
+            <div class="tool-error-message">
+                <h2>Tool Error</h2>
+                <p>${userMessage}</p>
+            </div>`;
+        elements.resultArea.className = 'tool-result'; // Reset class to default then add error specific if needed, or ensure error message class handles all styling.
+                                                     // The .tool-error-message class should handle its own styling.
+        elements.resultArea.style.display = 'block';
+
+        // Manage visibility of control buttons
+        if(elements.backButton) elements.backButton.style.display = 'none';
+        if(elements.printButton) elements.printButton.style.display = 'none';
+        // Keep restart button visible
+        if(elements.restartButton) elements.restartButton.style.display = 'inline-block';
+
+        elements.resultArea.focus(); // Set focus for accessibility.
+    }
+
+    /**
+     * Creates an HTML fragment containing the detailed sections of a result (documents, info, links).
+     * @param {object} result - The result object from the decision tree.
+     * @returns {DocumentFragment} A document fragment with the formatted result details.
+     */
+    function createResultDetailsElement(result) {
+        const fragment = document.createDocumentFragment(); // Use a fragment for efficient DOM manipulation.
+
+        // Add "Required Documents" section if data exists.
+        if (result.requiredDocuments && result.requiredDocuments.length > 0) {
+            const documentsDiv = document.createElement('div');
+            documentsDiv.className = 'result-documents'; // Apply styling.
+            const h3Docs = document.createElement('h3');
+            h3Docs.textContent = 'Required Documents:';
+            documentsDiv.appendChild(h3Docs);
+            const ulDocs = document.createElement('ul');
+            result.requiredDocuments.forEach(doc => { // Create list items for each document.
+                const li = document.createElement('li');
+                li.textContent = doc;
+                ulDocs.appendChild(li);
+            });
+            documentsDiv.appendChild(ulDocs);
+            fragment.appendChild(documentsDiv); // Add this section to the fragment.
+        }
+
+        // Add "Additional Information" section if data exists.
+        if (result.additionalInfo && result.additionalInfo.length > 0) {
+            const additionalInfoDiv = document.createElement('div');
+            additionalInfoDiv.className = 'result-details'; // Apply styling.
+            const h3Info = document.createElement('h3');
+            h3Info.textContent = 'Additional Information:';
+            additionalInfoDiv.appendChild(h3Info);
+            const ulInfo = document.createElement('ul');
+            result.additionalInfo.forEach(info => { // Create list items for each piece of info.
+                const li = document.createElement('li');
+                li.textContent = info;
+                ulInfo.appendChild(li);
+            });
+            additionalInfoDiv.appendChild(ulInfo);
+            fragment.appendChild(additionalInfoDiv); // Add this section to the fragment.
+        }
+
+        // Add "Official Resources" (OPM Links) section if data exists.
+        if (result.opmLinks && result.opmLinks.length > 0) {
+            const linksDiv = document.createElement('div');
+            linksDiv.className = 'result-links'; // Apply styling.
+            const h3Links = document.createElement('h3');
+            h3Links.textContent = 'Official Resources:';
+            linksDiv.appendChild(h3Links);
+            const ulLinks = document.createElement('ul');
+            result.opmLinks.forEach(link => { // Create list items with hyperlinks for each link.
+                const li = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = link.url;
+                a.textContent = link.text;
+                a.target = '_blank'; // Open links in a new tab.
+                a.rel = 'noopener noreferrer'; // Security best practice for external links.
+                li.appendChild(a);
+                ulLinks.appendChild(li);
+            });
+            linksDiv.appendChild(ulLinks);
+            fragment.appendChild(linksDiv); // Add this section to the fragment.
+        }
+        return fragment; // Return the populated document fragment.
+    }
+
+    /**
+     * Displays the final result to the user.
+     * This function is called when the user reaches an endpoint in the decision tree.
+     * @param {object} result - The result object containing title, description, and other details.
+     */
     function displayResult(result) {
+        // Error handling: if the result object is invalid.
+        // This can happen if a resultOutcome ID in the tree is mistyped or refers to a non-existent node.
         if (!result) {
-            console.error('Result object is undefined. Current state:', state, 'Triggering answer:', state.answers[state.currentQuestionId]);
-            // Display a generic error to the user
-            elements.resultArea.innerHTML = `<h2>Error</h2><p>An unexpected error occurred. Please restart the tool.</p>`;
-            elements.resultArea.style.display = 'block';
-            elements.questionArea.style.display = 'none';
-            elements.answersArea.style.display = 'none';
-            elements.printButton.style.display = 'inline-block';
-            elements.backButton.style.display = 'none';
+            console.error('Error: displayResult was called with an undefined result object.', 'Current state:', state, 'Triggering answer:', state.answers[state.currentQuestionId]);
+            displayCriticalError('An unexpected error occurred while trying to display the result. Please restart the tool.');
             return;
         }
+
+        // Hide question and answer areas, show the result area.
+            elements.questionArea.style.display = 'none';
+            elements.answersArea.style.display = 'none';
+            elements.printButton.style.display = 'inline-block'; // Show print button.
+            elements.backButton.style.display = 'none'; // Hide back button on result screen.
+            return;
+        }
+
+        // Hide question and answer areas, show the result area.
         elements.questionArea.style.display = 'none';
         elements.answersArea.style.display = 'none';
         elements.resultArea.style.display = 'block';
+        elements.resultArea.innerHTML = ''; // Clear any previous result content.
 
-        // Apply result type styling
+        // Apply a CSS class based on the result type for specific styling (e.g., eligibility color-coding).
         elements.resultArea.className = `tool-result ${result.type}`;
 
-        // Build result HTML
-        let resultHTML = `
-            <h2>${result.title}</h2>
-            <p>${result.description}</p>
-        `;
+        // Add the main title and description for the result.
+        const titleElement = document.createElement('h2');
+        titleElement.textContent = result.title;
+        elements.resultArea.appendChild(titleElement);
 
-        if (result.requiredDocuments && result.requiredDocuments.length > 0) {
-            resultHTML += `
-                <div class="result-documents">
-                    <h3>Required Documents:</h3>
-                    <ul>
-                        ${result.requiredDocuments.map(doc => `<li>${doc}</li>`).join('')}
-                    </ul>
-                </div>
-            `;
-        }
+        const descriptionElement = document.createElement('p');
+        descriptionElement.textContent = result.description;
+        elements.resultArea.appendChild(descriptionElement);
 
-        if (result.additionalInfo && result.additionalInfo.length > 0) {
-            resultHTML += `
-                <div class="result-details">
-                    <h3>Additional Information:</h3>
-                    <ul>
-                        ${result.additionalInfo.map(info => `<li>${info}</li>`).join('')}
-                    </ul>
-                </div>
-            `;
-        }
+        // Create and append the detailed sections (documents, info, links) using the helper function.
+        const resultDetailsElement = createResultDetailsElement(result);
+        elements.resultArea.appendChild(resultDetailsElement);
 
-        if (result.opmLinks && result.opmLinks.length > 0) {
-            resultHTML += `
-                <div class="result-links">
-                    <h3>Official Resources:</h3>
-                    <ul>
-                        ${result.opmLinks.map(link =>
-                            `<li><a href="${link.url}" target="_blank" rel="noopener noreferrer">${link.text}</a></li>`
-                        ).join('')}
-                    </ul>
-                </div>
-            `;
-        }
-
-        elements.resultArea.innerHTML = resultHTML;
+        // Make the print button visible and hide the back button.
         elements.printButton.style.display = 'inline-block';
         elements.backButton.style.display = 'none';
 
-        // Update progress to 100%
+        // Update progress to 100% as the user has reached a conclusion.
         state.currentStep = state.totalSteps;
         updateProgress();
+
+        // Set focus to the result area for screen reader announcements.
+        elements.resultArea.focus();
     }
 
-    // Update progress bar
+    /**
+     * Updates the visual progress bar based on the current step and total steps.
+     * Also updates ARIA attributes for accessibility.
+     */
     function updateProgress() {
-        const progress = (state.currentStep / state.totalSteps) * 100;
-        elements.progressBar.style.width = `${progress}%`;
-        elements.currentStep.textContent = state.currentStep;
+        // Calculate progress percentage, ensuring totalSteps is not zero to avoid division by zero.
+        const progress = (state.totalSteps > 0) ? (state.currentStep / state.totalSteps) * 100 : 0;
+        elements.progressBar.style.width = `${progress}%`; // Set the width of the progress bar.
+        elements.currentStep.textContent = state.currentStep; // Update current step number display.
 
-        // Update ARIA attributes
+        // Update ARIA attributes for screen readers.
         const progressContainer = document.querySelector('.tool-progress');
         if (progressContainer) {
             progressContainer.setAttribute('aria-valuenow', progress);
