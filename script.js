@@ -237,8 +237,19 @@
         announcer.setAttribute('role', 'status');
         announcer.setAttribute('aria-live', 'polite');
         announcer.setAttribute('aria-atomic', 'true');
-        announcer.className = config.CSS_CLASSES.SCREEN_READER_ONLY; // Use config for class name
-        document.body.appendChild(announcer);
+
+        if (config && config.CSS_CLASSES && typeof config.CSS_CLASSES.SCREEN_READER_ONLY === 'string') {
+            announcer.className = config.CSS_CLASSES.SCREEN_READER_ONLY;
+        } else {
+            announcer.className = 'sr-only'; // Default class if config is missing
+            console.warn('Config issue: config.CSS_CLASSES.SCREEN_READER_ONLY is not defined. Using default "sr-only".');
+        }
+        // Ensure document.body exists before appending. Should be true within DOMContentLoaded.
+        if (document.body) {
+            document.body.appendChild(announcer);
+        } else {
+            console.error('document.body is not available when trying to append screen reader announcer.');
+        }
     }
 
     function checkAccessibleLabels(config) {
