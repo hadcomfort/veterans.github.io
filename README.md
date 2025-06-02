@@ -22,7 +22,7 @@ To run this website locally for development or personal use:
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/veterans-info/veterans.github.io.git
+    git clone https://github.com/hadcomfort/veterans.github.io.git
     ```
 2.  **Navigate to the directory:**
     ```bash
