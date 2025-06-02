@@ -272,6 +272,7 @@
         "id": "SPOUSE_ELIGIBILITY",
         "questionText": "What is the veteran's current status?",
         "helpText": "Spouses may be eligible for derivative preference under specific circumstances.",
+        "explanationText": "Derivative preference for a spouse (often called 'XP' or 'Widow/Widower' preference) depends on very specific conditions related to the veteran's service-connected disability or their status if deceased or missing.\\n\\nKey scenarios include:\\n- **Living Veteran:** The veteran must have a 100% permanent and total service-connected disability, AND importantly, be unable to perform their usual job specifically because of this disability.\\n- **Deceased Veteran:** The veteran's death must have been service-connected, OR they must have been rated 100% permanently and totally disabled from service-connected causes at the time of death. Generally, the spouse must be unremarried to claim this preference.\\n- **MIA/Captured Veteran:** Special provisions apply if the veteran is in a missing or captured status.\\n\\nThis question helps determine which of these general conditions might apply to the veteran.",
         "answers": [
             {
                 "answerText": "Living veteran with 100% service-connected disability",
