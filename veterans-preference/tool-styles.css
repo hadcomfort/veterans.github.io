@@ -249,3 +249,79 @@
         font-size: 0.9rem;
     }
 }
+
+/* Styles for the hamburger menu button */
+.menu-toggle {
+    display: none; /* Hidden by default, shown via media query */
+    background-color: transparent;
+    border: 1px solid var(--primary-color);
+    color: var(--primary-color);
+    padding: 0.5rem 0.75rem;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 1rem;
+    margin-bottom: 1rem; /* Space below button */
+}
+
+.menu-toggle:hover,
+.menu-toggle:focus {
+    background-color: var(--primary-color-light);
+    color: var(--text-light);
+}
+
+/* Styles for the navigation menu container */
+header nav ul#main-menu {
+    display: flex; /* Default for desktop: flex layout */
+    flex-direction: row;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block; /* Show the hamburger button on mobile */
+    }
+
+    header nav ul#main-menu {
+        display: none; /* Hide the menu by default on mobile */
+        flex-direction: column; /* Stack links vertically on mobile */
+        width: 100%; /* Take full width */
+        background-color: var(--bg-secondary); /* Optional: background for dropdown */
+        padding: 0.5rem 0; /* Padding for the dropdown */
+    }
+
+    header nav ul#main-menu.is-open {
+        display: flex; /* Show the menu when .is-open class is present */
+    }
+
+    /* Adjust list item styling for mobile dropdown */
+    header nav ul#main-menu li {
+        width: 100%;
+        text-align: left; /* Or center, as per design */
+    }
+
+    header nav ul#main-menu li a {
+        display: block;
+        padding: 0.75rem 1rem; /* Make tap targets larger */
+        border-bottom: 1px solid var(--border-color); /* Separator for links */
+    }
+
+    header nav ul#main-menu li:last-child a {
+        border-bottom: none;
+    }
+
+    /* Ensure dropdowns within the menu also adapt if necessary */
+    header nav ul#main-menu .dropdown-content {
+        position: static; /* Change from absolute to static for mobile flow */
+        box-shadow: none;
+        border: none;
+        background-color: transparent; /* Blend with parent menu background */
+    }
+
+    header nav ul#main-menu .dropdown-content li a {
+        padding-left: 2rem; /* Indent sub-menu items */
+        color: var(--text-secondary); /* Adjust color if needed */
+    }
+}
