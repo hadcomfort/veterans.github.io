@@ -444,7 +444,7 @@ footer {
     }
 
     .header-content {
-        padding: 1rem 1rem 0.75rem;
+        padding: 1rem 5rem 0.75rem 1rem;
     }
     .header-content h1 {
         font-size: 1.375rem; /* Approx 22px */
