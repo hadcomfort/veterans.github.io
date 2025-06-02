@@ -128,7 +128,6 @@ header {
     top: 0;
     z-index: 1000;
     box-shadow: var(--shadow-sm);
-    position: relative; /* For positioning menu toggle */
 }
 
 .header-content {
