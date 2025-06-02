@@ -274,14 +274,26 @@ nav a[aria-current="page"] {
 main {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    /* Adjusted padding: top now accounts for sticky header + buffer, original horizontal/bottom retained */
+    padding: 12rem 1rem 2rem; /* Desktop: header ~10.5rem + 1.5rem buffer */
 }
+
+/* General style for sections within main for text overflow prevention */
+main section p,
+main section div, /* More generic for other content holders */
+main section article,
+main section li /* If lists are used directly in sections */ {
+    overflow-wrap: break-word;
+    word-break: break-word; /* Fallback for CJK, etc. */
+}
+
 
 /* Sections */
 section {
     margin-bottom: 3rem;
 }
 
+/* Specific section styling */
 /* Hero Section */
 .hero {
     text-align: center;
@@ -303,6 +315,21 @@ section {
     flex-wrap: wrap;
     margin-top: 1.5rem;
 }
+
+/* Feature Section Specifics */
+section.features {
+    /* Add horizontal padding to match main's horizontal padding or other sections */
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+/* Adjust padding for smaller screens if main's padding also changes */
+@media (max-width: 480px) {
+    section.features {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}
+
 
 /* Buttons */
 .btn {
@@ -348,7 +375,7 @@ section {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 1.5rem;
-    margin-top: 2rem;
+    /* margin-top: 2rem; /* This will be managed by section.features padding or h2 margin */
 }
 
 .feature-card {
@@ -480,6 +507,11 @@ footer {
         font-size: 1.1rem; /* Fine tune if needed */
     }
 
+    /* Adjust main padding for tablet header */
+    main {
+        padding: 10rem 1rem 2rem; /* Tablet: header ~8.5rem + 1.5rem buffer */
+    }
+
     /* Section spacing */
     section {
         margin-bottom: 2rem; /* Default for 768px, can be overridden by 480px */
@@ -608,12 +640,15 @@ nav ul#main-nav li:last-child a {
     }
 
     main {
-        padding: 1rem 0.75rem; /* Slightly less horizontal padding */
+        /* Adjust main padding for mobile header */
+        padding: 6rem 0.75rem 1rem; /* Mobile: header ~5rem + 1rem buffer */
     }
 
     section {
         margin-bottom: 1.5rem; /* Reduced spacing between sections */
     }
+
+    /* section.features padding is already handled by its own @media (max-width: 480px) rule */
 
     /* Hero further refinement */
     .hero {
