@@ -79,102 +79,121 @@
     let elements = {};
 
     /**
+     * Caches essential DOM elements for later use.
+     * @param {object} config - The configuration object.
+     * @param {object} elements - The global elements object to populate.
+     */
+    function cacheDOMElements(config, elements) {
+        elements.disclaimer = document.querySelector(config.SELECTORS.TOOL_DISCLAIMER);
+        elements.acceptButton = document.getElementById(config.SELECTORS.ACCEPT_DISCLAIMER_BUTTON.substring(1)); // getElementById doesn't need '#'
+        elements.toolInterface = document.getElementById(config.SELECTORS.TOOL_INTERFACE.substring(1));
+        elements.questionArea = document.getElementById(config.SELECTORS.QUESTION_AREA.substring(1));
+        elements.answersArea = document.getElementById(config.SELECTORS.ANSWERS_AREA.substring(1));
+        elements.resultArea = document.getElementById(config.SELECTORS.RESULT_AREA.substring(1));
+        elements.progressBar = document.querySelector(config.SELECTORS.PROGRESS_BAR);
+        elements.currentStep = document.getElementById(config.SELECTORS.CURRENT_STEP.substring(1));
+        elements.totalSteps = document.getElementById(config.SELECTORS.TOTAL_STEPS.substring(1));
+        elements.backButton = document.getElementById(config.SELECTORS.BACK_BUTTON.substring(1));
+        elements.restartButton = document.getElementById(config.SELECTORS.RESTART_BUTTON.substring(1));
+        elements.printButton = document.getElementById(config.SELECTORS.PRINT_BUTTON.substring(1));
+    }
+
+    /**
+     * Fetches and parses the decision tree JSON.
+     * @param {object} config - The configuration object.
+     * @returns {Promise<object>} A promise that resolves with the decision tree data.
+     * @throws {Error} If fetching or parsing fails.
+     */
+    async function fetchDecisionTree(config) {
+        const response = await fetch(config.DECISION_TREE_URL);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    }
+
+    /**
+     * Sets up event listeners for controls that are independent of the decision tree data.
+     * @param {object} config - The configuration object.
+     * @param {object} elements - The cached DOM elements.
+     * @param {function} restartToolFn - Reference to the restartTool function.
+     * @param {function} goBackFn - Reference to the goBack function.
+     * @param {function} printResultsFn - Reference to the printResults function.
+     */
+    function setupInitialEventListeners(config, elements, restartToolFn, goBackFn, printResultsFn) {
+        if (elements.restartButton) {
+            elements.restartButton.addEventListener('click', restartToolFn);
+        }
+        if (elements.backButton) {
+            elements.backButton.addEventListener('click', goBackFn);
+        }
+        if (elements.printButton) {
+            elements.printButton.addEventListener('click', printResultsFn);
+        }
+        // Note: acceptButton listener is set up in init() after tree is loaded.
+    }
+
+    /**
+     * Handles errors during the initialization process.
+     * Displays an error message and disables the tool.
+     * @param {object} config - The configuration object.
+     * @param {object} elements - The cached DOM elements.
+     * @param {Error} error - The error object.
+     */
+    function handleInitializationError(config, elements, error) {
+        console.error('Error loading decision tree:', error);
+        if (elements.questionArea) {
+            elements.questionArea.innerHTML = `
+                <div class="${config.CSS_CLASSES.TOOL_ERROR_MESSAGE}">
+                    <h2>${config.ERROR_MESSAGES.INIT_ERROR_TITLE}</h2>
+                    <p>${config.ERROR_MESSAGES.INIT_ERROR_MESSAGE}</p>
+                    <p>${config.ERROR_MESSAGES.INIT_ERROR_SUGGESTION}</p>
+                </div>`;
+            elements.questionArea.style.display = 'block';
+        }
+        if (elements.answersArea) elements.answersArea.style.display = 'none';
+        
+        // Query for toolControls and toolProgress within this function scope
+        // as they might not be cached in 'elements' if cacheDOMElements failed or wasn't called.
+        const toolControls = document.querySelector(config.SELECTORS.TOOL_CONTROLS);
+        if (toolControls) toolControls.style.display = 'none';
+        
+        const progressContainer = document.querySelector(config.SELECTORS.TOOL_PROGRESS);
+        if (progressContainer) progressContainer.style.display = 'none';
+
+        if (elements.acceptButton) {
+            elements.acceptButton.disabled = true;
+            elements.acceptButton.textContent = config.BUTTON_TEXT.TOOL_UNAVAILABLE;
+        }
+    }
+
+    /**
      * Initializes the interactive tool.
-     * This function performs several key setup tasks:
-     * 1. Caches essential DOM elements for later use.
-     * 2. Asynchronously fetches the decision tree data from a JSON file.
-     * 3. If data fetching is successful:
-     *    - Stores the decision tree in `vetPreferenceTree`.
-     *    - Sets up event listeners for UI elements that depend on the tree data (e.g., starting the tool).
-     *    - Calculates the total number of steps for the progress bar.
-     * 4. If data fetching fails:
-     *    - Logs the error to the console.
-     *    - Displays an error message to the user.
-     *    - Disables the tool to prevent further interaction.
-     * 5. Sets up event listeners for UI elements that do not depend on the tree data (e.g., restart, back, print).
      */
     async function init() {
-        // Cache DOM elements for quick access.
-        elements = {
-            disclaimer: document.querySelector(config.SELECTORS.TOOL_DISCLAIMER),
-            acceptButton: document.getElementById(config.SELECTORS.ACCEPT_DISCLAIMER_BUTTON),
-            toolInterface: document.getElementById(config.SELECTORS.TOOL_INTERFACE),
-            questionArea: document.getElementById(config.SELECTORS.QUESTION_AREA),
-            answersArea: document.getElementById(config.SELECTORS.ANSWERS_AREA),
-            resultArea: document.getElementById(config.SELECTORS.RESULT_AREA),
-            progressBar: document.querySelector(config.SELECTORS.PROGRESS_BAR), // The progress bar element.
-            currentStep: document.getElementById(config.SELECTORS.CURRENT_STEP),   // Element displaying the current step number.
-            totalSteps: document.getElementById(config.SELECTORS.TOTAL_STEPS),     // Element displaying the total estimated steps.
-            backButton: document.getElementById(config.SELECTORS.BACK_BUTTON),     // The "Back" button.
-            restartButton: document.getElementById(config.SELECTORS.RESTART_BUTTON), // The "Restart" button.
-            printButton: document.getElementById(config.SELECTORS.PRINT_BUTTON)     // The "Print" button.
-        };
+        cacheDOMElements(config, elements);
+        setupInitialEventListeners(config, elements, restartTool, goBack, printResults);
 
-        // Asynchronously fetch the decision tree data.
         try {
-            const response = await fetch(config.DECISION_TREE_URL);
-            if (!response.ok) {
-                // Handle HTTP errors (e.g., 404 Not Found, 500 Server Error).
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            vetPreferenceTree = await response.json(); // Parse the JSON response.
+            vetPreferenceTree = await fetchDecisionTree(config);
 
-            // Setup event listeners and perform initial calculations that depend on the decision tree.
+            // Setup parts that depend on vetPreferenceTree
             if (elements.acceptButton) {
+                // Ensure it's not disabled by a previous error, though unlikely if tree fetch succeeded.
+                elements.acceptButton.disabled = false; 
+                elements.acceptButton.textContent = document.getElementById(config.SELECTORS.ACCEPT_DISCLAIMER_BUTTON.substring(1)).textContent; // Reset text if it was changed
                 elements.acceptButton.addEventListener('click', startTool);
             }
 
-            // Calculate and display the total number of steps for progress indication.
-            state.totalSteps = countTotalSteps(vetPreferenceTree); // Pass the loaded tree
+            state.totalSteps = countTotalSteps(vetPreferenceTree, config); // Pass config
             if (elements.totalSteps) {
                 elements.totalSteps.textContent = state.totalSteps;
             }
 
-            // Placeholder for any other initializations that might depend on the loaded tree.
-
         } catch (error) {
-            // Catch errors from fetch (e.g., network issues) or JSON parsing.
-            console.error('Error loading decision tree:', error);
-            // Inform the user that the tool cannot be loaded.
-            if (elements.questionArea) {
-                // Use a more structured error display
-                elements.questionArea.innerHTML = `
-                    <div class="${config.CSS_CLASSES.TOOL_ERROR_MESSAGE}">
-                        <h2>${config.ERROR_MESSAGES.INIT_ERROR_TITLE}</h2>
-                        <p>${config.ERROR_MESSAGES.INIT_ERROR_MESSAGE}</p>
-                        <p>${config.ERROR_MESSAGES.INIT_ERROR_SUGGESTION}</p>
-                    </div>`;
-                elements.questionArea.style.display = 'block'; // Ensure question area is visible for the error.
-            }
-            // Hide other parts of the tool interface that shouldn't be active.
-            if (elements.answersArea) elements.answersArea.style.display = 'none';
-            const toolControls = document.querySelector(config.SELECTORS.TOOL_CONTROLS); // Specific selector if elements.toolControls is not defined yet or to be safe
-            if (toolControls) toolControls.style.display = 'none';
-            if (elements.progressBar) { // Assuming progressBar is the inner bar, hide its container
-                const progressContainer = document.querySelector(config.SELECTORS.TOOL_PROGRESS);
-                if (progressContainer) progressContainer.style.display = 'none';
-            }
-
-
-            // Disable the tool's start mechanism if data loading fails.
-            if (elements.acceptButton) {
-                elements.acceptButton.disabled = true;
-                elements.acceptButton.textContent = config.BUTTON_TEXT.TOOL_UNAVAILABLE;
-            }
-            return; // Halt further initialization as the tool is not functional.
-        }
-
-        // Setup event listeners for controls that are independent of the decision tree data.
-        if (elements.restartButton) {
-            elements.restartButton.addEventListener('click', restartTool);
-        }
-
-        if (elements.backButton) {
-            elements.backButton.addEventListener('click', goBack);
-        }
-
-        if (elements.printButton) {
-            elements.printButton.addEventListener('click', printResults);
+            handleInitializationError(config, elements, error);
+            // No return needed here as handleInitializationError doesn't throw,
+            // and further execution in init is not harmful.
         }
     }
 
@@ -183,9 +202,11 @@
      * This function traverses the `vetPreferenceTree` from the 'START' node to find the
      * maximum depth, which is used as an estimate for the total steps in the progress bar.
      * If the tree is not loaded, it returns a default value.
+     * @param {object} tree - The decision tree data.
+     * @param {object} config - The configuration object.
      * @returns {number} The estimated maximum depth of the decision tree, or a default value.
      */
-    function countTotalSteps(tree) {
+    function countTotalSteps(tree, config) { // Added config parameter
         if (!tree || Object.keys(tree).length === 0 || !tree[config.INITIAL_QUESTION_ID]) {
             return config.DEFAULT_TOTAL_STEPS; // Default to 1 if tree is empty or START node is missing
         }
@@ -316,16 +337,30 @@
     /**
      * Creates an HTML button element for a given answer.
      * @param {object} answer - The answer object from the decision tree.
+     * @param {function} handleAnswerFn - The function to call when the answer is selected.
      * @returns {HTMLButtonElement} A button element configured with the answer text and a click handler.
      */
-    function createAnswerButton(answer) {
+    function createAnswerButton(answer, handleAnswerFn) {
         const button = document.createElement('button');
         button.className = config.CSS_CLASSES.ANSWER_OPTION; // Apply styling for answer buttons.
         button.textContent = answer.answerText; // Set the button text.
         // Set an event listener to handle the answer selection.
-        // The `handleAnswer` function will be called with the specific answer object when clicked.
-        button.addEventListener('click', () => handleAnswer(answer));
+        button.addEventListener('click', () => handleAnswerFn(answer));
         return button; // Return the configured button.
+    }
+
+    /**
+     * Renders the answer options for the current question.
+     * @param {object} config - The configuration object.
+     * @param {object} question - The current question object.
+     * @param {HTMLElement} answersArea - The DOM element to append answer buttons to.
+     * @param {function} handleAnswerFn - The function to call when an answer is selected.
+     */
+    function renderAnswerOptions(config, question, answersArea, handleAnswerFn) {
+        question.answers.forEach(answer => {
+            const answerButton = createAnswerButton(answer, handleAnswerFn); // Pass handleAnswerFn
+            answersArea.appendChild(answerButton);
+        });
     }
 
     /**
@@ -338,7 +373,7 @@
         // Error handling: if the question ID is invalid or not found.
         if (!question) {
             console.error(`Error: Question with ID "${questionId}" not found in decision tree.`);
-            displayCriticalError(config.ERROR_MESSAGES.QUESTION_NOT_FOUND);
+            displayCriticalError(config.ERROR_MESSAGES.QUESTION_NOT_FOUND, config, elements); // Pass config and elements
             return;
         }
 
@@ -355,14 +390,11 @@
         elements.resultArea.style.display = 'none'; // Ensure result area is hidden.
 
         // Create and display the question element.
-        const questionElement = createQuestionElement(question);
+        const questionElement = createQuestionElement(question); // createQuestionElement is already fine
         elements.questionArea.appendChild(questionElement);
 
-        // Create and display buttons for each answer.
-        question.answers.forEach(answer => {
-            const answerButton = createAnswerButton(answer);
-            elements.answersArea.appendChild(answerButton);
-        });
+        // Render answer options
+        renderAnswerOptions(config, question, elements.answersArea, handleAnswer);
 
         // Show or hide the "Back" button based on navigation history.
         elements.backButton.style.display = state.history.length > 0 ? 'inline-block' : 'none';
@@ -395,7 +427,7 @@
                 const resultData = vetPreferenceTree[resultNodeId];
                 if (!resultData) {
                     console.error(`Error: Result node with ID "${resultNodeId}" not found in decision tree.`);
-                    displayCriticalError(config.ERROR_MESSAGES.RESULT_NODE_NOT_FOUND);
+                    displayCriticalError(config.ERROR_MESSAGES.RESULT_NODE_NOT_FOUND, config, elements); // Pass config and elements
                     return;
                 }
                 displayResult(resultData);
@@ -409,27 +441,29 @@
     /**
      * Displays a critical error message to the user, typically when the tool cannot proceed.
      * @param {string} userMessage - The user-friendly message to display.
+     * @param {object} config - The configuration object.
+     * @param {object} elements - The cached DOM elements.
      */
-    function displayCriticalError(userMessage) {
-        elements.questionArea.style.display = 'none';
-        elements.answersArea.style.display = 'none';
+    function displayCriticalError(userMessage, config, elements) { // Added config and elements parameters
+        if (elements.questionArea) elements.questionArea.style.display = 'none';
+        if (elements.answersArea) elements.answersArea.style.display = 'none';
 
-        elements.resultArea.innerHTML = `
-            <div class="${config.CSS_CLASSES.TOOL_ERROR_MESSAGE}">
-                <h2>${config.ERROR_MESSAGES.CRITICAL_ERROR_TITLE}</h2>
-                <p>${userMessage}</p>
-            </div>`;
-        elements.resultArea.className = config.CSS_CLASSES.TOOL_RESULT; // Reset class to default then add error specific if needed, or ensure error message class handles all styling.
-                                                     // The .tool-error-message class should handle its own styling.
-        elements.resultArea.style.display = 'block';
+        if (elements.resultArea) {
+            elements.resultArea.innerHTML = `
+                <div class="${config.CSS_CLASSES.TOOL_ERROR_MESSAGE}">
+                    <h2>${config.ERROR_MESSAGES.CRITICAL_ERROR_TITLE}</h2>
+                    <p>${userMessage}</p>
+                </div>`;
+            elements.resultArea.className = config.CSS_CLASSES.TOOL_RESULT; 
+            elements.resultArea.style.display = 'block';
+            elements.resultArea.focus(); // Set focus for accessibility.
+        }
 
         // Manage visibility of control buttons
-        if(elements.backButton) elements.backButton.style.display = 'none';
-        if(elements.printButton) elements.printButton.style.display = 'none';
+        if (elements.backButton) elements.backButton.style.display = 'none';
+        if (elements.printButton) elements.printButton.style.display = 'none';
         // Keep restart button visible
-        if(elements.restartButton) elements.restartButton.style.display = 'inline-block';
-
-        elements.resultArea.focus(); // Set focus for accessibility.
+        if (elements.restartButton) elements.restartButton.style.display = 'inline-block';
     }
 
     /**
@@ -508,26 +542,21 @@
         // This can happen if a resultOutcome ID in the tree is mistyped or refers to a non-existent node.
         if (!result) {
             console.error('Error: displayResult was called with an undefined result object.', 'Current state:', state, 'Triggering answer:', state.answers[state.currentQuestionId]);
-            displayCriticalError(config.ERROR_MESSAGES.UNEXPECTED_RESULT_ERROR);
+            displayCriticalError(config.ERROR_MESSAGES.UNEXPECTED_RESULT_ERROR, config, elements); // Pass config and elements
             return;
         }
 
-        // Hide question and answer areas, show the result area.
-            elements.questionArea.style.display = 'none';
-            elements.answersArea.style.display = 'none';
-            elements.printButton.style.display = 'inline-block'; // Show print button.
-            elements.backButton.style.display = 'none'; // Hide back button on result screen.
-        // The return; and the erroneous closing } were removed here.
-
-        // Hide question and answer areas, show the result area.
-        // The following lines are now reachable and will execute.
+        // Hide question/answer areas, show result area and print button, hide back button.
         elements.questionArea.style.display = 'none';
         elements.answersArea.style.display = 'none';
         elements.resultArea.style.display = 'block';
-        elements.resultArea.innerHTML = ''; // Clear any previous result content.
+        elements.printButton.style.display = 'inline-block';
+        elements.backButton.style.display = 'none';
 
-        // Apply a CSS class based on the result type for specific styling (e.g., eligibility color-coding).
-        elements.resultArea.className = `${config.CSS_CLASSES.TOOL_RESULT} ${result.type}`;
+        // Clear previous result content and set class (type can be undefined, so handle that)
+        elements.resultArea.innerHTML = ''; 
+        elements.resultArea.className = config.CSS_CLASSES.TOOL_RESULT + (result.type ? ` ${result.type}` : '');
+
 
         // Add the main title and description for the result.
         const titleElement = document.createElement('h2');
@@ -611,31 +640,4 @@
         document.addEventListener('DOMContentLoaded', init);
     }
 
-    // Hamburger menu toggle functionality
-/*
-    function setupMenuToggle() {
-        const menuToggleButton = document.querySelector('.menu-toggle');
-        const mainMenu = document.querySelector('.tool-main-menu');
-
-        if (menuToggleButton && mainMenu) {
-            menuToggleButton.addEventListener('click', function() {
-                const isExpanded = mainMenu.classList.toggle('is-open');
-                menuToggleButton.setAttribute('aria-expanded', isExpanded);
-                // Optional: Change button text based on state
-                // menuToggleButton.textContent = isExpanded ? 'Close Menu' : 'Menu';
-            });
-        }
-    }
-*/
-
-/*
-    // Call this function after the main init or ensure DOM is ready.
-    // If init() already handles DOM readiness, integrate this call there,
-    // or ensure it's called appropriately.
-    if (document.readyState === 'interactive' || document.readyState === 'complete') {
-        setupMenuToggle();
-    } else {
-        document.addEventListener('DOMContentLoaded', setupMenuToggle);
-    }
-*/
 })();
