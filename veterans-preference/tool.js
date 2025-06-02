@@ -553,6 +553,7 @@
     }
 
     // Hamburger menu toggle functionality
+/*
     function setupMenuToggle() {
         const menuToggleButton = document.querySelector('.menu-toggle');
         const mainMenu = document.getElementById('main-menu');
@@ -566,7 +567,9 @@
             });
         }
     }
+*/
 
+/*
     // Call this function after the main init or ensure DOM is ready.
     // If init() already handles DOM readiness, integrate this call there,
     // or ensure it's called appropriately.
@@ -575,4 +578,5 @@
     } else {
         document.addEventListener('DOMContentLoaded', setupMenuToggle);
     }
+*/
 })();
