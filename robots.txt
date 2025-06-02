@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://veterans-info.github.io/sitemap.xml
