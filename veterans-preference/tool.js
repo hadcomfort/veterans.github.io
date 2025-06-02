@@ -458,10 +458,10 @@
             elements.answersArea.style.display = 'none';
             elements.printButton.style.display = 'inline-block'; // Show print button.
             elements.backButton.style.display = 'none'; // Hide back button on result screen.
-            return;
-        }
+        // The return; and the erroneous closing } were removed here.
 
         // Hide question and answer areas, show the result area.
+        // The following lines are now reachable and will execute.
         elements.questionArea.style.display = 'none';
         elements.answersArea.style.display = 'none';
         elements.resultArea.style.display = 'block';
