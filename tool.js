@@ -76,6 +76,10 @@
             helpText: 'Your discharge characterization is shown on your DD-214 or equivalent discharge documentation.',
             answers: [
                 {
+                    answerText: "Honorable or General (and I specifically want to check for Sole Survivorship Preference first)",
+                    nextQuestionId: "SSP_DATE_CHECK"
+                },
+                {
                     answerText: 'Honorable',
                     nextQuestionId: 'SERVICE_DATES'
                 },
@@ -629,6 +633,59 @@
             ]
         }
         // Additional nodes would continue here...
+
+        // SSP Outcome Definition
+        sspEligibleOutcome: {
+            type: "info-0-point", // May need a new CSS class for distinct styling if desired
+            title: "0-Point Sole Survivorship Preference (SSP) Potentially Eligible",
+            description: "Based on your responses, you may be eligible for 0-point Sole Survivorship Preference (SSP). This preference does not add points to your score but provides other significant advantages in federal hiring.",
+            additionalInfo: [
+                "You are entitled to be listed ahead of non-preference eligibles with the same examination score or in the same quality category.",
+                "You have the same pass-over rights as other preference eligibles.",
+                "Your experience in the armed forces can be credited towards meeting qualification requirements for Federal jobs.",
+                "Eligibility requires discharge/release after August 29, 2008, due to a sole survivorship discharge."
+            ],
+            requiredDocuments: [
+                "DD Form 214 (Certificate of Release or Discharge from Active Duty) that indicates a sole survivorship discharge.",
+                "SF-15, Application for 10-Point Veteran Preference (While SSP is 0-point, this form is often used to formally claim any veteran preference status; follow agency instructions).",
+                "If requested by the agency, documentation related to the qualifying family member's service and status."
+            ],
+            opmLinks: [
+                { text: "OPM Vet Guide - Types of Preference (see 0-point SSP)", url: "https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/" }
+            ]
+        },
+
+        // SSP Path Starts Here
+        SSP_DATE_CHECK: {
+            id: 'SSP_DATE_CHECK',
+            questionText: "Was your discharge or release from active duty on or after August 29, 2008?",
+            answers: [
+                {
+                    answerText: 'Yes',
+                    nextQuestionId: 'SSP_REASON_CHECK'
+                },
+                {
+                    answerText: 'No',
+                    nextQuestionId: 'SERVICE_DATES' // If too early for SSP, proceed to check other preference types
+                }
+            ]
+        },
+
+        SSP_REASON_CHECK: {
+            id: 'SSP_REASON_CHECK',
+            questionText: "Was the reason for this discharge specifically a 'sole survivorship discharge'?",
+            helpText: "This type of discharge is granted if you are the only surviving child in a family where a parent or sibling(s) served in the armed forces and suffered certain casualties (e.g., death, MIA, 100% disability).",
+            answers: [
+                {
+                    answerText: 'Yes',
+                    resultOutcome: 'sspEligibleOutcome' // Reference the defined outcome
+                },
+                {
+                    answerText: 'No',
+                    nextQuestionId: 'SERVICE_DATES' // If not an SSP discharge, proceed to check other preference types
+                }
+            ]
+        }
     };
 
     // DOM elements
@@ -680,7 +737,7 @@
     function countTotalSteps() {
         // Updated approximation after adding new nodes. Max depth could be around 5-7 in complex paths.
         // This is still an estimate for UI display.
-        return 15; // Increased from 10
+        return 17; // Increased from 10, then by 2 for SSP_DATE_CHECK and SSP_REASON_CHECK
     }
 
     // Start the tool after accepting disclaimer
@@ -740,12 +797,28 @@
         if (answer.nextQuestionId) {
             displayQuestion(answer.nextQuestionId);
         } else if (answer.resultOutcome) {
-            displayResult(answer.resultOutcome);
+            // Check if resultOutcome is a string ID (like for SSP) or an object
+            if (typeof answer.resultOutcome === 'string') {
+                displayResult(vetPreferenceTree[answer.resultOutcome]);
+            } else {
+                displayResult(answer.resultOutcome);
+            }
         }
     }
 
     // Display result
     function displayResult(result) {
+        if (!result) {
+            console.error('Result object is undefined. Current state:', state, 'Triggering answer:', state.answers[state.currentQuestionId]);
+            // Display a generic error to the user
+            elements.resultArea.innerHTML = `<h2>Error</h2><p>An unexpected error occurred. Please restart the tool.</p>`;
+            elements.resultArea.style.display = 'block';
+            elements.questionArea.style.display = 'none';
+            elements.answersArea.style.display = 'none';
+            elements.printButton.style.display = 'inline-block';
+            elements.backButton.style.display = 'none';
+            return;
+        }
         elements.questionArea.style.display = 'none';
         elements.answersArea.style.display = 'none';
         elements.resultArea.style.display = 'block';
