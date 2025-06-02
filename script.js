@@ -50,30 +50,67 @@
 
     // Enhanced navigation functionality
     function initializeNavigation() {
-        // Mobile menu toggle if implemented
         const menuToggle = document.querySelector('.menu-toggle');
-        const nav = document.querySelector('nav ul');
+        const mainNav = document.getElementById('main-nav'); // Use ID for main nav UL
 
-        if (menuToggle && nav) {
+        if (menuToggle && mainNav) {
             menuToggle.addEventListener('click', function() {
-                nav.classList.toggle('active');
-                const expanded = this.getAttribute('aria-expanded') === 'true';
-                this.setAttribute('aria-expanded', !expanded);
+                const isExpanded = mainNav.classList.toggle('nav-open');
+                this.setAttribute('aria-expanded', isExpanded);
             });
         }
 
-        // Dropdown keyboard navigation
         const dropdowns = document.querySelectorAll('.dropdown');
         dropdowns.forEach(dropdown => {
-            const trigger = dropdown.querySelector('a');
+            const trigger = dropdown.querySelector('a[aria-haspopup="true"]'); // More specific selector
             const content = dropdown.querySelector('.dropdown-content');
 
             if (trigger && content) {
                 trigger.addEventListener('click', function(e) {
-                    if (window.innerWidth <= 768) {
-                        e.preventDefault();
-                        const expanded = this.getAttribute('aria-expanded') === 'true';
-                        this.setAttribute('aria-expanded', !expanded);
+                    if (window.innerWidth <= 768) { // Mobile/touch behavior
+                        e.preventDefault(); // Prevent navigation for parent link
+
+                        const isExpanded = this.getAttribute('aria-expanded') === 'true';
+
+                        // Close other open dropdowns on mobile
+                        if (!isExpanded) { // If about to open this one
+                            dropdowns.forEach(otherDropdown => {
+                                if (otherDropdown !== dropdown) {
+                                    otherDropdown.querySelector('a[aria-haspopup="true"]').setAttribute('aria-expanded', 'false');
+                                    otherDropdown.querySelector('.dropdown-content').classList.remove('dropdown-open');
+                                }
+                            });
+                        }
+
+                        this.setAttribute('aria-expanded', !isExpanded);
+                        content.classList.toggle('dropdown-open');
+                    }
+                    // Desktop hover is handled by CSS, but ensure aria-expanded is correct if JS interacts
+                    // For desktop, if we want click instead of hover, logic would go here
+                });
+            }
+        });
+
+        // Close menu/dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth <= 768) {
+                // Close mobile nav if click is outside
+                if (mainNav && mainNav.classList.contains('nav-open')) {
+                    if (!mainNav.contains(event.target) && !menuToggle.contains(event.target)) {
+                        mainNav.classList.remove('nav-open');
+                        menuToggle.setAttribute('aria-expanded', 'false');
+                    }
+                }
+
+                // Close open dropdowns if click is outside
+                dropdowns.forEach(dropdown => {
+                    const content = dropdown.querySelector('.dropdown-content');
+                    const trigger = dropdown.querySelector('a[aria-haspopup="true"]');
+                    if (content && content.classList.contains('dropdown-open')) {
+                        if (!dropdown.contains(event.target)) {
+                            content.classList.remove('dropdown-open');
+                            trigger.setAttribute('aria-expanded', 'false');
+                        }
                     }
                 });
             }
@@ -111,21 +148,6 @@
         }
     }
 
-    // Utility: Screen reader only class
-    const srOnlyStyle = document.createElement('style');
-    srOnlyStyle.textContent = `
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border-width: 0;
-        }
-    `;
-    document.head.appendChild(srOnlyStyle);
+    // Utility: Screen reader only class .visually-hidden is now in style.css
 
 })();

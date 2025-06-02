@@ -28,6 +28,7 @@
 
     --transition-fast: 150ms ease-in-out;
     --transition-normal: 250ms ease-in-out;
+    --header-height-mobile: 60px; /* Example, adjust as needed */
 }
 
 /* Base Styles */
@@ -35,9 +36,21 @@
     box-sizing: border-box;
 }
 
+/* Accessibility utility class */
+.visually-hidden {
+    position: absolute !important;
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
+    clip: rect(1px, 1px, 1px, 1px);
+    white-space: nowrap; /* Avoids line breaks affecting layout */
+}
+
+
 body {
     margin: 0;
     padding: 0;
+    overflow-x: hidden; /* Prevent horizontal scroll as a safeguard */
     font-family: var(--font-sans);
     font-size: 16px;
     line-height: 1.7;
@@ -45,6 +58,11 @@ body {
     background-color: var(--bg-primary);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+}
+
+img, svg { /* Basic responsive images */
+    max-width: 100%;
+    height: auto;
 }
 
 /* Typography */
@@ -110,6 +128,7 @@ header {
     top: 0;
     z-index: 1000;
     box-shadow: var(--shadow-sm);
+    position: relative; /* For positioning menu toggle */
 }
 
 .header-content {
@@ -166,6 +185,42 @@ nav a[aria-current="page"] {
     color: var(--primary-color);
 }
 
+/* Menu Toggle Button (Hamburger) */
+.menu-toggle {
+    display: none; /* Hidden by default, shown in media query */
+    background: transparent;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    position: absolute;
+    top: 1rem; /* Adjust as needed */
+    right: 1rem; /* Adjust as needed */
+    z-index: 1001; /* Above nav */
+    font-size: 1.5rem; /* For "Menu" text, can be replaced by icon */
+    color: var(--primary-color);
+}
+
+.menu-toggle .icon-bar {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background-color: var(--primary-color);
+    border-radius: 1px;
+    margin: 4px 0;
+    transition: all var(--transition-fast);
+}
+
+.menu-toggle[aria-expanded="true"] .icon-bar:nth-child(1) {
+    transform: translateY(6px) rotate(45deg);
+}
+.menu-toggle[aria-expanded="true"] .icon-bar:nth-child(2) {
+    opacity: 0;
+}
+.menu-toggle[aria-expanded="true"] .icon-bar:nth-child(3) {
+    transform: translateY(-6px) rotate(-45deg);
+}
+
+
 /* Dropdown Navigation */
 .dropdown {
     position: relative;
@@ -174,20 +229,34 @@ nav a[aria-current="page"] {
 .dropdown-content {
     display: none;
     position: absolute;
-    top: 100%;
+    top: 100%; /* Default for desktop */
     left: 0;
     min-width: 200px;
     background: var(--bg-primary);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
-    margin-top: 0.5rem;
+    margin-top: 0.5rem; /* Spacing from parent */
+    z-index: 1002; /* Ensure dropdown is above other nav items */
+    transition: opacity var(--transition-fast), visibility var(--transition-fast);
+    opacity: 0;
+    visibility: hidden;
 }
 
 .dropdown:hover .dropdown-content,
 .dropdown:focus-within .dropdown-content {
-    display: block;
+    display: block; /* Kept for desktop hover/focus */
+    opacity: 1;
+    visibility: visible;
 }
+
+/* JS class to open dropdown, useful for touch or overriding hover */
+.dropdown-content.dropdown-open {
+    display: block;
+    opacity: 1;
+    visibility: visible;
+}
+
 
 .dropdown-content a {
     padding: 0.75rem 1rem;
@@ -365,28 +434,162 @@ footer {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    h1 { font-size: 2rem; }
-    h2 { font-size: 1.5rem; }
-    h3 { font-size: 1.25rem; }
+    h1 { font-size: 1.875rem; } /* Approx 30px */
+    h2 { font-size: 1.375rem; } /* Approx 22px */
+    h3 { font-size: 1.125rem; } /* Approx 18px */
+    h4 { font-size: 1rem; }     /* Approx 16px */
 
+    p, li, a { /* Adjust base text and link sizes for readability */
+        font-size: 0.95rem; /* Approx 15.2px, slightly smaller if 16px feels too large */
+    }
+
+    .header-content {
+        padding: 1rem 1rem 0.75rem;
+    }
     .header-content h1 {
-        font-size: 1.5rem;
+        font-size: 1.375rem; /* Approx 22px */
+    }
+    .tagline {
+        font-size: 0.85rem;
     }
 
-    nav ul {
-        flex-direction: column;
+    /* Hero Section adjustments */
+    .hero {
+        padding: 1.5rem 1rem;
+        margin-bottom: 2rem;
+    }
+    .hero h1 { /* This is the main page title in hero, not site title */
+        font-size: 1.75rem; /* Approx 28px, was 2rem (h1 general) */
+    }
+    .hero p {
+        font-size: 1rem; /* Approx 16px */
+        margin-bottom: 1.5rem;
+    }
+    .cta-buttons {
+        gap: 0.75rem;
+    }
+
+    /* Feature Grid adjustments */
+    .feature-grid {
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Slightly smaller min for cards */
+    }
+    .feature-card {
+        padding: 1.25rem;
+    }
+    .feature-card h3 { /* Already 1.125rem from general h3 */
+        font-size: 1.1rem; /* Fine tune if needed */
+    }
+
+    /* Section spacing */
+    section {
+        margin-bottom: 2rem; /* Default for 768px, can be overridden by 480px */
+    }
+
+    /* Footer adjustments */
+    footer {
+        padding: 1.5rem 1rem 0.5rem;
+        margin-top: 2rem;
+    }
+    .footer-content {
+        gap: 1.5rem;
+    }
+    .footer-section h3 {
+        font-size: 1.05rem; /* Slightly smaller */
+        margin-bottom: 0.75rem;
+    }
+    .footer-section li {
+        margin-bottom: 0.4rem;
+    }
+    .footer-bottom {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        font-size: 0.8rem;
+    }
+
+
+/* Mobile Navigation Styles */
+.menu-toggle {
+    display: block; /* Show hamburger */
+    /* Minimal styling for "Menu" text if no icon. For icon: */
+    /* text-indent: -9999px; */
+    /* width: 40px; */
+    /* height: 40px; */
+    /* background-image: url('path/to/hamburger-icon.svg'); */
+    /* background-repeat: no-repeat; */
+    /* background-position: center; */
+}
+
+nav ul#main-nav {
+    display: none; /* Hide nav by default on mobile */
+    position: absolute;
+    top: 100%; /* Position below the header */
+    left: 0;
+    right: 0;
+    background-color: var(--bg-primary);
+    border-top: 1px solid var(--border-color);
+    box-shadow: var(--shadow-md);
         padding: 1rem 0;
-        max-height: 70vh;
+    max-height: calc(100vh - var(--header-height-mobile)); /* Adjust if header height changes */
         overflow-y: auto;
+    transition: transform var(--transition-normal), opacity var(--transition-normal);
+    transform: translateY(-10px); /* Start slightly above for transition */
+    opacity: 0;
+    z-index: 1000; /* Ensure it's above content but below sticky header if toggle is outside */
+    flex-direction: column; /* Stack items vertically */
+    align-items: stretch; /* Stretch items to full width */
     }
 
+nav ul#main-nav.nav-open {
+    display: flex; /* Show nav when class is applied */
+    transform: translateY(0);
+    opacity: 1;
+}
+
+nav ul#main-nav li {
+    width: 100%;
+}
+
+nav ul#main-nav a {
+    padding: 0.75rem 1.5rem; /* Larger tap targets */
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+nav ul#main-nav li:last-child a {
+    border-bottom: none;
+}
+
+
+/* Mobile Dropdown Adjustments */
     .dropdown-content {
-        position: static;
+    position: static; /* Make dropdowns flow in the main nav column */
         box-shadow: none;
         border: none;
-        background: var(--bg-tertiary);
+    background: var(--bg-tertiary); /* Slightly different bg for distinction */
         margin: 0;
+    width: 100%;
+    border-radius: 0;
+    opacity: 1; /* Ensure visible when parent is, if not using dropdown-open for display */
+    visibility: visible; /* Ensure visible when parent is */
+    /* display: none; /* Controlled by JS by toggling a class like .dropdown-open */
     }
+
+/* Remove hover effect for main dropdown link on mobile if it's only for submenu toggle */
+.dropdown > a[aria-expanded="true"]:hover {
+    /* background: var(--bg-primary); /* Or whatever normal state is */
+}
+
+
+.dropdown:hover .dropdown-content {
+    display: none; /* Disable hover opening on mobile, rely on click */
+}
+.dropdown-content.dropdown-open {
+    display: block; /* JS will toggle this */
+}
+
+.dropdown-content a {
+    padding: 0.75rem 2rem; /* Indent submenu items slightly */
+}
+
 
     .cta-buttons {
         flex-direction: column;
@@ -399,16 +602,64 @@ footer {
 
 @media (max-width: 480px) {
     .header-content h1 {
-        font-size: 1.25rem;
+        font-size: 1.2rem; /* Approx 19px */
+    }
+    .tagline {
+        font-size: 0.8rem;
     }
 
     main {
-        padding: 1rem;
+        padding: 1rem 0.75rem; /* Slightly less horizontal padding */
     }
 
     section {
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem; /* Reduced spacing between sections */
     }
+
+    /* Hero further refinement */
+    .hero {
+        padding: 1rem 0.75rem;
+    }
+    .hero h1 {
+        font-size: 1.5rem; /* Approx 24px */
+    }
+    .hero p {
+        font-size: 0.9rem; /* Approx 14.4px */
+    }
+
+    /* Feature Grid for very small screens */
+    .feature-grid {
+        grid-template-columns: 1fr; /* Stack to single column */
+        gap: 0.75rem;
+    }
+    .feature-card {
+        padding: 1rem;
+    }
+    .feature-card h3 {
+        font-size: 1.05rem;
+    }
+
+
+    /* Footer for very small screens */
+    .footer-section h3 {
+        font-size: 1rem;
+    }
+    .footer-section p, .footer-section li { /* Includes mailto and links */
+        font-size: 0.85rem;
+    }
+    .footer-bottom p {
+        font-size: 0.75rem;
+    }
+
+    /* General heading adjustments for very small screens */
+    h1 { font-size: 1.6rem; }
+    h2 { font-size: 1.25rem; }
+    h3 { font-size: 1.05rem; } /* Sync with .feature-card h3 if needed */
+    h4 { font-size: 0.95rem; }
+
+    /* Nav link font size on mobile if needed (already quite large tap targets) */
+    /* nav ul#main-nav a { font-size: 1rem; } */
+
 }
 
 /* Print Styles */
