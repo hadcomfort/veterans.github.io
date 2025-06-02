@@ -1,21 +1,23 @@
-# Veterans' Preference Guide
+# General Veterans Information Portal & Veterans' Preference Guide
 
 ## Description
-This website provides a comprehensive guide to Veterans' Preference in federal employment. Its purpose is to offer clear, accessible information based on the official OPM Vet Guide for HR Professionals, helping veterans, their families, and HR personnel understand these important benefits.
+This website serves as a General Veterans Information Portal, with a primary focus on providing a comprehensive guide to Veterans' Preference in federal employment. Its purpose is to offer clear, accessible information, largely based on the official OPM Vet Guide for HR Professionals, helping veterans, their families, and HR personnel understand these important benefits and related resources.
 
 ## Source of Information
 The content on this website is based on the official "OPM Vet Guide for HR Professionals" published by the U.S. Office of Personnel Management (OPM). You can typically find this guide on the OPM website. For the most current version, please refer to: [OPM Vet Guide for HR Professionals](https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/).
 
-## How to Use This Guide
-This website is structured to help you easily find the information you need:
+## How to Use This Site
+This website has two main parts:
 
-*   **Eligibility Requirements:** Details on who qualifies for Veterans' Preference, including character of discharge and necessary documentation.
-*   **Types of Preference:** Explanations of the different preference categories, such as 5-point, 10-point, and derivative preference.
-*   **Interactive Assessment Tool:** A guided questionnaire to help users determine potential preference eligibility and identify relevant documentation.
-*   **Frequently Asked Questions (FAQ):** Answers to common questions regarding Veterans' Preference.
-*   **Reduction in Force (RIF) Procedures:** Information on how Veterans' Preference applies during RIF scenarios (Content under development).
-*   **Special Appointing Authorities:** Details on special hiring authorities for veterans (Content under development).
-*   **Appendices:** Useful supplementary information related to wars, campaigns, qualifying service, and a history of Veterans' Preference.
+1.  **General Veterans Information Portal (Root `index.html`):** The main entry point (`index.html`) provides an overview of various veteran resources and links to key areas, including the specialized Veterans' Preference Guide.
+2.  **Veterans' Preference Guide (`veterans-preference/index.html`):** This comprehensive guide, located in the `/veterans-preference/` directory, is structured to help you easily find detailed information on Veterans' Preference:
+    *   **Eligibility Requirements:** Details on who qualifies for Veterans' Preference, including character of discharge and necessary documentation.
+    *   **Types of Preference:** Explanations of the different preference categories, such as 5-point, 10-point, and derivative preference.
+    *   **Interactive Assessment Tool:** A guided questionnaire to help users determine potential preference eligibility and identify relevant documentation.
+    *   **Frequently Asked Questions (FAQ):** Answers to common questions regarding Veterans' Preference.
+    *   **Reduction in Force (RIF) Procedures:** Information on how Veterans' Preference applies during RIF scenarios.
+    *   **Special Appointing Authorities:** Details on special hiring authorities for veterans.
+    *   **Appendices:** Useful supplementary information related to wars, campaigns, qualifying service, and a history of Veterans' Preference.
 
 ## Local Development Setup
 To run this website locally for development or personal use:
@@ -28,8 +30,9 @@ To run this website locally for development or personal use:
     ```bash
     cd veterans.github.io
     ```
-3.  **Open `index.html` in your web browser:**
-    Simply open the `index.html` file located in the root of the cloned directory in any modern web browser.
+3.  **Open `index.html` (Portal) or `veterans-preference/index.html` (VP Guide) in your web browser:**
+    *   To view the main portal, open `index.html` in the root.
+    *   To view the Veterans' Preference Guide directly, open `veterans-preference/index.html`.
 
 No complex build steps or special dependencies are currently required to view or develop this site.
 
