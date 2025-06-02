@@ -551,4 +551,28 @@
     } else {
         document.addEventListener('DOMContentLoaded', init);
     }
+
+    // Hamburger menu toggle functionality
+    function setupMenuToggle() {
+        const menuToggleButton = document.querySelector('.menu-toggle');
+        const mainMenu = document.getElementById('main-menu');
+
+        if (menuToggleButton && mainMenu) {
+            menuToggleButton.addEventListener('click', function() {
+                const isExpanded = mainMenu.classList.toggle('is-open');
+                menuToggleButton.setAttribute('aria-expanded', isExpanded);
+                // Optional: Change button text based on state
+                // menuToggleButton.textContent = isExpanded ? 'Close Menu' : 'Menu';
+            });
+        }
+    }
+
+    // Call this function after the main init or ensure DOM is ready.
+    // If init() already handles DOM readiness, integrate this call there,
+    // or ensure it's called appropriately.
+    if (document.readyState === 'interactive' || document.readyState === 'complete') {
+        setupMenuToggle();
+    } else {
+        document.addEventListener('DOMContentLoaded', setupMenuToggle);
+    }
 })();
