@@ -3,22 +3,61 @@
     'use strict';
 
     // DOM Content Loaded
-    document.addEventListener('DOMContentLoaded', async function() { // Marked as async
+    document.addEventListener('DOMContentLoaded', async function() {
         initializeYear();
         initializeLastUpdated();
-        // initializeNavigation(); // Moved down
         initializeAccessibility();
-        initializeAnalytics();
-        // loadHTMLSnippets(); // Call moved and awaited
+        initializeAnalytics(); // Corrected typo from initializeAnalytis
 
         try {
-            await loadHTMLSnippets(); // Wait for header and navigation
-            initializeNavigation(); // Initialize navigation after HTML is loaded
+            await loadHTMLSnippetsAndInitializeNav();
         } catch (error) {
-            console.error("Error loading critical HTML snippets:", error);
-            // Optionally, handle the error more gracefully, e.g., show a message to the user
+            console.error("Failed to load HTML snippets and initialize navigation:", error);
+            // Optionally, display a user-friendly message on the page
         }
     });
+
+    // New function to load HTML snippets and then initialize navigation
+    async function loadHTMLSnippetsAndInitializeNav() {
+        const loadSnippet = async (url, placeholderId) => {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+                }
+                const html = await response.text();
+                const placeholder = document.getElementById(placeholderId);
+                if (placeholder) {
+                    placeholder.innerHTML = html;
+                } else {
+                    console.error(`Placeholder #${placeholderId} not found.`);
+                    throw new Error(`Placeholder #${placeholderId} not found.`);
+                }
+            } catch (error) {
+                console.error(`Error loading ${url}:`, error);
+                throw error; // Re-throw to be caught by Promise.all or the caller
+            }
+        };
+
+        // Load footer independently - no need to await for nav initialization
+        loadSnippet('footer.html', 'footer-placeholder').catch(error => {
+            console.error('Error loading footer.html (non-critical):', error);
+        });
+
+        try {
+            // Wait for header and navigation to be loaded and injected
+            await Promise.all([
+                loadSnippet('header.html', 'header-placeholder'),
+                loadSnippet('navigation.html', 'navigation-placeholder')
+            ]);
+            initializeNavigation(); // Call initializeNavigation after header and nav are loaded
+        } catch (error) {
+            console.error("Error loading critical HTML (header/navigation):", error);
+            // If header or navigation fails, we might want to stop further JS execution
+            // or display a prominent error message.
+            throw error; // Re-throw to be caught by DOMContentLoaded listener
+        }
+    }
 
     // Update current year
     function initializeYear() {
@@ -59,8 +98,15 @@
 
     // Enhanced navigation functionality
     function initializeNavigation() {
-        const menuToggle = document.querySelector('.menu-toggle');
-        const mainNav = document.querySelector('.main-navigation-menu'); // Use ID for main nav UL
+        const menuToggle = document.querySelector('#header-placeholder .menu-toggle');
+        const mainNav = document.querySelector('#navigation-placeholder .main-navigation-menu');
+
+        if (!menuToggle) {
+            console.error("Menu toggle button (.menu-toggle) not found within #header-placeholder.");
+        }
+        if (!mainNav) {
+            console.error("Main navigation menu (.main-navigation-menu) not found within #navigation-placeholder.");
+        }
 
         if (menuToggle && mainNav) {
             menuToggle.addEventListener('click', function() {
@@ -69,7 +115,8 @@
             });
         }
 
-        const dropdowns = document.querySelectorAll('.dropdown');
+        // Ensure dropdowns are also scoped if they are part of the loaded navigation
+        const dropdowns = document.querySelectorAll('#navigation-placeholder .dropdown');
         dropdowns.forEach(dropdown => {
             const trigger = dropdown.querySelector('a[aria-haspopup="true"]'); // More specific selector
             const content = dropdown.querySelector('.dropdown-content');
@@ -159,63 +206,6 @@
 
     // Utility: Screen reader only class .visually-hidden is now in style.css
 
-    // Function to load HTML snippets
-    async function loadHTMLSnippets() {
-        const loadHeader = fetch('header.html')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch header.html: ${response.status}`);
-                }
-                return response.text();
-            })
-            .then(html => {
-                const placeholder = document.getElementById('header-placeholder');
-                if (placeholder) {
-                    placeholder.innerHTML = html;
-                } else {
-                    console.error('Placeholder #header-placeholder not found.');
-                    throw new Error('Placeholder #header-placeholder not found.');
-                }
-            });
+    // Utility: Screen reader only class .visually-hidden is now in style.css
 
-        const loadNavigation = fetch('navigation.html')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch navigation.html: ${response.status}`);
-                }
-                return response.text();
-            })
-            .then(html => {
-                const placeholder = document.getElementById('navigation-placeholder');
-                if (placeholder) {
-                    placeholder.innerHTML = html;
-                } else {
-                    console.error('Placeholder #navigation-placeholder not found.');
-                    throw new Error('Placeholder #navigation-placeholder not found.');
-                }
-            });
-
-        // Load footer independently and don't wait for it in the main promise
-        fetch('footer.html')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch footer.html: ${response.status}`);
-                }
-                return response.text();
-            })
-            .then(html => {
-                const placeholder = document.getElementById('footer-placeholder');
-                if (placeholder) {
-                    placeholder.innerHTML = html;
-                } else {
-                    console.error('Placeholder #footer-placeholder not found.');
-                }
-            })
-            .catch(error => {
-                console.error('Error loading footer.html:', error);
-            });
-
-        // Return a promise that resolves when header and navigation are loaded
-        return Promise.all([loadHeader, loadNavigation]);
-    }
 })();
