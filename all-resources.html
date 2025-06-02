@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>General Veterans Information Portal</title>
-    <meta name="description" content="Your comprehensive guide to veterans information on benefits, healthcare, education, employment, and more.">
-    <meta name="keywords" content="veterans, benefits, healthcare, education, employment, resources, support">
+    <title>All Veteran Resources - General Veterans Information Portal</title>
+    <meta name="description" content="A central hub for all veteran resource categories including healthcare, education, employment, and housing.">
+    <meta name="keywords" content="veterans, resources, all resources, healthcare, education, employment, housing, benefits">
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
-    <link rel="canonical" href="https://veterans-info.github.io/index.html">
-    <!-- Favicon (assuming it's in the images folder as per original) -->
+    <link rel="canonical" href="https://veterans-info.github.io/all-resources.html">
     <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
 </head>
 <body>
@@ -19,17 +18,16 @@
     <!-- Header -->
     <header role="banner">
         <div class="header-content">
-            <!-- Modified Title for the new portal -->
             <h1>General Veterans Information Portal</h1>
             <p class="tagline">Your Comprehensive Resource Hub</p>
         </div>
 
         <nav role="navigation" aria-label="Main navigation">
             <ul>
-                <li><a href="index.html" aria-current="page">Home</a></li>
+                <li><a href="index.html">Home</a></li>
                 <li><a href="veterans-preference/index.html">Veterans' Preference Guide</a></li>
                 <li class="dropdown">
-                    <a href="all-resources.html" aria-haspopup="true" aria-expanded="false">Resources</a>
+                    <a href="#" aria-haspopup="true" aria-expanded="false" aria-current="page">Resources</a>
                     <ul class="dropdown-content">
                         <li><a href="healthcare.html">Healthcare</a></li>
                         <li><a href="education.html">Education</a></li>
@@ -46,31 +44,42 @@
     <!-- Main Content -->
     <main id="main-content" role="main">
         <section class="hero">
-            <h1>Your Comprehensive Guide to Veterans Information & Resources</h1>
-            <p>Find information on benefits, healthcare, education, employment, and more.</p>
-            <div class="cta-buttons">
-                <a href="veterans-preference/index.html" class="button">Explore Veterans' Preference Guide</a>
-                <a href="all-resources.html" class="button button-secondary">View All Resources</a>
+            <h1>All Veteran Resources</h1>
+            <p>Find dedicated pages for each category of veteran support and information.</p>
+        </section>
+
+        <section class="content-section">
+            <h2>Resource Categories</h2>
+            <p>Explore the following sections to find detailed information and official links for various veteran services:</p>
+
+            <div class="features-grid">
+                <div>
+                    <h2><a href="healthcare.html">Veterans Healthcare Resources</a></h2>
+                    <p>Access information on VA medical benefits, clinics, mental health support, and crisis intervention services.</p>
+                </div>
+                <div>
+                    <h2><a href="education.html">Veterans Education & Training Resources</a></h2>
+                    <p>Discover resources for the GI Bill, vocational training, career counseling, and educational assistance for dependents.</p>
+                </div>
+                <div>
+                    <h2><a href="employment.html">Veterans Employment Resources</a></h2>
+                    <p>Find tools for job searching, career development, transition assistance, and information on employment rights for veterans.</p>
+                </div>
+                <div>
+                    <h2><a href="housing.html">Veterans Housing Assistance Resources</a></h2>
+                    <p>Learn about VA home loans, grants for disabled veterans, and programs to support homeless or at-risk veterans.</p>
+                </div>
             </div>
         </section>
 
-        <section class="features-grid">
-            <div><h2><a href="veterans-preference/index.html">Veterans' Preference in Federal Employment</a></h2></div>
-            <div><h2><a href="healthcare.html">VA Healthcare Benefits</a></h2></div>
-            <div><h2><a href="education.html">Education & Training Programs</a></h2></div>
-            <div><h2><a href="housing.html">Housing Assistance</a></h2></div>
-            <div><h2><a href="employment.html">Employment Opportunities</a></h2></div>
-            <div><h2><a href="all-resources.html#state-benefits">State-Specific Benefits (Placeholder)</a></h2></div>
-        </section>
-
-        <section class="disclaimer"> <!-- Copied from existing index.html (now veterans-preference-original-index.html) -->
+        <section class="disclaimer">
             <h2>Important Information</h2>
-            <p>This website is for informational purposes only and does not constitute legal advice or official determination of eligibility. All information is based on the <a href="https://www.opm.gov/policy-data-oversight/veterans-services/vet-guide-for-hr-professionals/" target="_blank" rel="noopener noreferrer">OPM Vet Guide for HR Professionals</a>. For official determinations, consult with your agency's HR department or a Veterans Service Officer.</p>
+            <p>This website is for informational purposes only and does not constitute legal advice or official determination of eligibility. All information is based on publicly available government resources. For official determinations, consult with the respective government agency.</p>
         </section>
     </main>
 
     <!-- Footer -->
-    <footer role="contentinfo"> <!-- Copied from existing index.html (now veterans-preference-original-index.html) -->
+    <footer role="contentinfo">
         <div class="footer-content">
             <div class="footer-section">
                 <h3>Quick Links</h3>
@@ -93,7 +102,7 @@
             <div class="footer-section">
                 <h3>Contact</h3>
                 <p>For site feedback: <a href="mailto:feedback@veterans-info.github.io">feedback@veterans-info.github.io</a></p>
-                <p>For official inquiries: Contact your agency HR or VSO</p>
+                <p>For official inquiries: Contact the relevant government agency</p>
             </div>
         </div>
 
@@ -102,7 +111,5 @@
             <p>Last updated: <span id="last-updated">Loading...</span></p>
         </div>
     </footer>
-
-    <!-- script.js is already linked in the head -->
 </body>
 </html>
