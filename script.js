@@ -3,13 +3,21 @@
     'use strict';
 
     // DOM Content Loaded
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', async function() { // Marked as async
         initializeYear();
         initializeLastUpdated();
-        initializeNavigation();
+        // initializeNavigation(); // Moved down
         initializeAccessibility();
         initializeAnalytics();
-        loadHTMLSnippets(); // Added call
+        // loadHTMLSnippets(); // Call moved and awaited
+
+        try {
+            await loadHTMLSnippets(); // Wait for header and navigation
+            initializeNavigation(); // Initialize navigation after HTML is loaded
+        } catch (error) {
+            console.error("Error loading critical HTML snippets:", error);
+            // Optionally, handle the error more gracefully, e.g., show a message to the user
+        }
     });
 
     // Update current year
@@ -153,52 +161,61 @@
 
     // Function to load HTML snippets
     async function loadHTMLSnippets() {
-        try {
-            const response = await fetch('header.html');
-            if (!response.ok) {
-                throw new Error(`Failed to fetch header.html: ${response.status}`);
-            }
-            const html = await response.text();
-            const placeholder = document.getElementById('header-placeholder');
-            if (placeholder) {
-                placeholder.innerHTML = html;
-            } else {
-                console.error('Placeholder #header-placeholder not found.');
-            }
-        } catch (error) {
-            console.error('Error loading header.html:', error);
-        }
+        const loadHeader = fetch('header.html')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch header.html: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(html => {
+                const placeholder = document.getElementById('header-placeholder');
+                if (placeholder) {
+                    placeholder.innerHTML = html;
+                } else {
+                    console.error('Placeholder #header-placeholder not found.');
+                    throw new Error('Placeholder #header-placeholder not found.');
+                }
+            });
 
-        try {
-            const response = await fetch('navigation.html');
-            if (!response.ok) {
-                throw new Error(`Failed to fetch navigation.html: ${response.status}`);
-            }
-            const html = await response.text();
-            const placeholder = document.getElementById('navigation-placeholder');
-            if (placeholder) {
-                placeholder.innerHTML = html;
-            } else {
-                console.error('Placeholder #navigation-placeholder not found.');
-            }
-        } catch (error) {
-            console.error('Error loading navigation.html:', error);
-        }
+        const loadNavigation = fetch('navigation.html')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch navigation.html: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(html => {
+                const placeholder = document.getElementById('navigation-placeholder');
+                if (placeholder) {
+                    placeholder.innerHTML = html;
+                } else {
+                    console.error('Placeholder #navigation-placeholder not found.');
+                    throw new Error('Placeholder #navigation-placeholder not found.');
+                }
+            });
 
-        try {
-            const response = await fetch('footer.html');
-            if (!response.ok) {
-                throw new Error(`Failed to fetch footer.html: ${response.status}`);
-            }
-            const html = await response.text();
-            const placeholder = document.getElementById('footer-placeholder');
-            if (placeholder) {
-                placeholder.innerHTML = html;
-            } else {
-                console.error('Placeholder #footer-placeholder not found.');
-            }
-        } catch (error) {
-            console.error('Error loading footer.html:', error);
-        }
+        // Load footer independently and don't wait for it in the main promise
+        fetch('footer.html')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch footer.html: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(html => {
+                const placeholder = document.getElementById('footer-placeholder');
+                if (placeholder) {
+                    placeholder.innerHTML = html;
+                } else {
+                    console.error('Placeholder #footer-placeholder not found.');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading footer.html:', error);
+            });
+
+        // Return a promise that resolves when header and navigation are loaded
+        return Promise.all([loadHeader, loadNavigation]);
     }
 })();
