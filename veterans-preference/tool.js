@@ -53,7 +53,7 @@
 
         // Asynchronously fetch the decision tree data.
         try {
-            const response = await fetch('veterans-preference/decision-tree.json');
+            const response = await fetch('decision-tree.json');
             if (!response.ok) {
                 // Handle HTTP errors (e.g., 404 Not Found, 500 Server Error).
                 throw new Error(`HTTP error! status: ${response.status}`);
