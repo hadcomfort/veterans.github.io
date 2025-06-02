@@ -4,6 +4,65 @@
 (function() {
     'use strict';
 
+    const config = {
+        DECISION_TREE_URL: 'decision-tree.json',
+        SELECTORS: {
+            TOOL_DISCLAIMER: '.tool-disclaimer',
+            ACCEPT_DISCLAIMER_BUTTON: '#accept-disclaimer',
+            TOOL_INTERFACE: '#tool-interface',
+            QUESTION_AREA: '#question-area',
+            ANSWERS_AREA: '#answers-area',
+            RESULT_AREA: '#result-area',
+            PROGRESS_BAR: '.progress-bar',
+            CURRENT_STEP: '#current-step',
+            TOTAL_STEPS: '#total-steps',
+            BACK_BUTTON: '#back-button',
+            RESTART_BUTTON: '#restart-button',
+            PRINT_BUTTON: '#print-button',
+            TOOL_CONTROLS: '.tool-controls',
+            TOOL_PROGRESS: '.tool-progress',
+        },
+        INITIAL_QUESTION_ID: 'START',
+        BUTTON_TEXT: {
+            TOOL_UNAVAILABLE: 'Tool Unavailable',
+            EXPLAIN_THIS: 'Explain this?',
+        },
+        CSS_CLASSES: {
+            HELP_TEXT: 'help-text',
+            EXPLANATION_TOGGLE: 'explanation-toggle',
+            EXPLANATION_CONTENT: 'explanation-content',
+            ANSWER_OPTION: 'answer-option',
+            TOOL_RESULT: 'tool-result',
+            RESULT_DOCUMENTS: 'result-documents',
+            RESULT_DETAILS: 'result-details',
+            RESULT_LINKS: 'result-links',
+            TOOL_ERROR_MESSAGE: 'tool-error-message',
+        },
+        LINK_ATTRIBUTES: {
+            TARGET_BLANK: '_blank',
+            REL_NOOPENER_NOREFERRER: 'noopener noreferrer',
+        },
+        ERROR_MESSAGES: {
+            INIT_ERROR_TITLE: 'Initialization Error',
+            INIT_ERROR_MESSAGE: 'Could not load the decision tree data required for this tool to function.',
+            INIT_ERROR_SUGGESTION: 'Please try refreshing the page. If the issue persists, the tool may be temporarily unavailable or there might be a network problem.',
+            DECISION_TREE_NOT_LOADED: "Decision tree not loaded yet. Cannot start tool.",
+            TOOL_LOADING: 'The tool is still loading. Please wait a moment and try again.',
+            QUESTION_NOT_FOUND: 'An error occurred while trying to load the question. Please restart the tool to try again.',
+            RESULT_NODE_NOT_FOUND: 'An error occurred while trying to determine the outcome. Please restart the tool.',
+            UNEXPECTED_RESULT_ERROR: 'An unexpected error occurred while trying to display the result. Please restart the tool.',
+            CRITICAL_ERROR_TITLE: 'Tool Error',
+        },
+        ARIA_ATTRIBUTES: {
+            EXPANDED: 'aria-expanded',
+            CONTROLS: 'aria-controls',
+            VALUENOW: 'aria-valuenow',
+        },
+        DEFAULT_TOTAL_STEPS: 1,
+        NEW_LINE_REGEX_GLOBAL: /\n\n/g,
+        NEW_LINE_REGEX: /\n/g,
+    };
+
     // Manages the overall state of the interactive tool.
     const state = {
         currentQuestionId: null, // ID of the question currently displayed to the user.
@@ -37,23 +96,23 @@
     async function init() {
         // Cache DOM elements for quick access.
         elements = {
-            disclaimer: document.querySelector('.tool-disclaimer'),
-            acceptButton: document.getElementById('accept-disclaimer'),
-            toolInterface: document.getElementById('tool-interface'),
-            questionArea: document.getElementById('question-area'),
-            answersArea: document.getElementById('answers-area'),
-            resultArea: document.getElementById('result-area'),
-            progressBar: document.querySelector('.progress-bar'), // The progress bar element.
-            currentStep: document.getElementById('current-step'),   // Element displaying the current step number.
-            totalSteps: document.getElementById('total-steps'),     // Element displaying the total estimated steps.
-            backButton: document.getElementById('back-button'),     // The "Back" button.
-            restartButton: document.getElementById('restart-button'), // The "Restart" button.
-            printButton: document.getElementById('print-button')     // The "Print" button.
+            disclaimer: document.querySelector(config.SELECTORS.TOOL_DISCLAIMER),
+            acceptButton: document.getElementById(config.SELECTORS.ACCEPT_DISCLAIMER_BUTTON),
+            toolInterface: document.getElementById(config.SELECTORS.TOOL_INTERFACE),
+            questionArea: document.getElementById(config.SELECTORS.QUESTION_AREA),
+            answersArea: document.getElementById(config.SELECTORS.ANSWERS_AREA),
+            resultArea: document.getElementById(config.SELECTORS.RESULT_AREA),
+            progressBar: document.querySelector(config.SELECTORS.PROGRESS_BAR), // The progress bar element.
+            currentStep: document.getElementById(config.SELECTORS.CURRENT_STEP),   // Element displaying the current step number.
+            totalSteps: document.getElementById(config.SELECTORS.TOTAL_STEPS),     // Element displaying the total estimated steps.
+            backButton: document.getElementById(config.SELECTORS.BACK_BUTTON),     // The "Back" button.
+            restartButton: document.getElementById(config.SELECTORS.RESTART_BUTTON), // The "Restart" button.
+            printButton: document.getElementById(config.SELECTORS.PRINT_BUTTON)     // The "Print" button.
         };
 
         // Asynchronously fetch the decision tree data.
         try {
-            const response = await fetch('decision-tree.json');
+            const response = await fetch(config.DECISION_TREE_URL);
             if (!response.ok) {
                 // Handle HTTP errors (e.g., 404 Not Found, 500 Server Error).
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -80,19 +139,19 @@
             if (elements.questionArea) {
                 // Use a more structured error display
                 elements.questionArea.innerHTML = `
-                    <div class="tool-error-message">
-                        <h2>Initialization Error</h2>
-                        <p>Could not load the decision tree data required for this tool to function.</p>
-                        <p>Please try refreshing the page. If the issue persists, the tool may be temporarily unavailable or there might be a network problem.</p>
+                    <div class="${config.CSS_CLASSES.TOOL_ERROR_MESSAGE}">
+                        <h2>${config.ERROR_MESSAGES.INIT_ERROR_TITLE}</h2>
+                        <p>${config.ERROR_MESSAGES.INIT_ERROR_MESSAGE}</p>
+                        <p>${config.ERROR_MESSAGES.INIT_ERROR_SUGGESTION}</p>
                     </div>`;
                 elements.questionArea.style.display = 'block'; // Ensure question area is visible for the error.
             }
             // Hide other parts of the tool interface that shouldn't be active.
             if (elements.answersArea) elements.answersArea.style.display = 'none';
-            const toolControls = document.querySelector('.tool-controls'); // Specific selector if elements.toolControls is not defined yet or to be safe
+            const toolControls = document.querySelector(config.SELECTORS.TOOL_CONTROLS); // Specific selector if elements.toolControls is not defined yet or to be safe
             if (toolControls) toolControls.style.display = 'none';
             if (elements.progressBar) { // Assuming progressBar is the inner bar, hide its container
-                const progressContainer = document.querySelector('.tool-progress');
+                const progressContainer = document.querySelector(config.SELECTORS.TOOL_PROGRESS);
                 if (progressContainer) progressContainer.style.display = 'none';
             }
 
@@ -100,7 +159,7 @@
             // Disable the tool's start mechanism if data loading fails.
             if (elements.acceptButton) {
                 elements.acceptButton.disabled = true;
-                elements.acceptButton.textContent = 'Tool Unavailable';
+                elements.acceptButton.textContent = config.BUTTON_TEXT.TOOL_UNAVAILABLE;
             }
             return; // Halt further initialization as the tool is not functional.
         }
@@ -127,8 +186,8 @@
      * @returns {number} The estimated maximum depth of the decision tree, or a default value.
      */
     function countTotalSteps(tree) {
-        if (!tree || Object.keys(tree).length === 0 || !tree['START']) {
-            return 1; // Default to 1 if tree is empty or START node is missing
+        if (!tree || Object.keys(tree).length === 0 || !tree[config.INITIAL_QUESTION_ID]) {
+            return config.DEFAULT_TOTAL_STEPS; // Default to 1 if tree is empty or START node is missing
         }
 
         /**
@@ -178,7 +237,7 @@
             return hasNextQuestion ? (1 + maxChildDepth) : 1;
         }
 
-        return getMaxDepth('START', tree, new Set());
+        return getMaxDepth(config.INITIAL_QUESTION_ID, tree, new Set());
     }
 
     /**
@@ -190,10 +249,10 @@
     function startTool() {
         // Ensure the decision tree is loaded before starting.
         if (Object.keys(vetPreferenceTree).length === 0) {
-            console.error("Decision tree not loaded yet. Cannot start tool.");
+            console.error(config.ERROR_MESSAGES.DECISION_TREE_NOT_LOADED);
             // Optionally, inform the user if the tool is still loading.
             if (elements.questionArea) {
-                elements.questionArea.innerHTML = `<p>The tool is still loading. Please wait a moment and try again.</p>`;
+                elements.questionArea.innerHTML = `<p>${config.ERROR_MESSAGES.TOOL_LOADING}</p>`;
             }
             return;
         }
@@ -201,7 +260,7 @@
         elements.disclaimer.style.display = 'none';
         elements.toolInterface.style.display = 'block';
         // Display the initial question.
-        displayQuestion('START');
+        displayQuestion(config.INITIAL_QUESTION_ID);
     }
 
     /**
@@ -218,7 +277,7 @@
         // Add help text if available for the question.
         if (question.helpText) {
             const helpTextElement = document.createElement('p');
-            helpTextElement.className = 'help-text'; // Apply styling for help text.
+            helpTextElement.className = config.CSS_CLASSES.HELP_TEXT; // Apply styling for help text.
             helpTextElement.textContent = question.helpText;
             questionElement.appendChild(helpTextElement);
         }
@@ -226,25 +285,25 @@
         // Add "Explain this?" feature if explanationText exists
         if (question.explanationText) {
             const explanationButton = document.createElement('button');
-            explanationButton.className = 'explanation-toggle';
-            explanationButton.textContent = 'Explain this?';
-            explanationButton.setAttribute('aria-expanded', 'false');
+            explanationButton.className = config.CSS_CLASSES.EXPLANATION_TOGGLE;
+            explanationButton.textContent = config.BUTTON_TEXT.EXPLAIN_THIS;
+            explanationButton.setAttribute(config.ARIA_ATTRIBUTES.EXPANDED, 'false');
 
             const explanationId = `explanation-${question.id || Math.random().toString(36).substr(2, 9)}`;
-            explanationButton.setAttribute('aria-controls', explanationId);
+            explanationButton.setAttribute(config.ARIA_ATTRIBUTES.CONTROLS, explanationId);
 
             const explanationDiv = document.createElement('div');
-            explanationDiv.className = 'explanation-content';
+            explanationDiv.className = config.CSS_CLASSES.EXPLANATION_CONTENT;
             explanationDiv.id = explanationId;
             // Sanitize or carefully construct HTML if explanationText can contain HTML.
             // For simple text, textContent is safer. If HTML is needed, ensure it's from a trusted source.
             // Assuming explanationText is simple text or safe HTML for this implementation.
-            explanationDiv.innerHTML = `<p>${question.explanationText.replace(/\n\n/g, '</p><p>').replace(/\n/g, '<br>')}</p>`; // Basic formatting for newlines
+            explanationDiv.innerHTML = `<p>${question.explanationText.replace(config.NEW_LINE_REGEX_GLOBAL, '</p><p>').replace(config.NEW_LINE_REGEX, '<br>')}</p>`; // Basic formatting for newlines
             explanationDiv.style.display = 'none'; // Initially hidden
 
             explanationButton.addEventListener('click', () => {
-                const isExpanded = explanationButton.getAttribute('aria-expanded') === 'true';
-                explanationButton.setAttribute('aria-expanded', !isExpanded);
+                const isExpanded = explanationButton.getAttribute(config.ARIA_ATTRIBUTES.EXPANDED) === 'true';
+                explanationButton.setAttribute(config.ARIA_ATTRIBUTES.EXPANDED, !isExpanded);
                 explanationDiv.style.display = isExpanded ? 'none' : 'block';
             });
 
@@ -261,7 +320,7 @@
      */
     function createAnswerButton(answer) {
         const button = document.createElement('button');
-        button.className = 'answer-option'; // Apply styling for answer buttons.
+        button.className = config.CSS_CLASSES.ANSWER_OPTION; // Apply styling for answer buttons.
         button.textContent = answer.answerText; // Set the button text.
         // Set an event listener to handle the answer selection.
         // The `handleAnswer` function will be called with the specific answer object when clicked.
@@ -279,7 +338,7 @@
         // Error handling: if the question ID is invalid or not found.
         if (!question) {
             console.error(`Error: Question with ID "${questionId}" not found in decision tree.`);
-            displayCriticalError(`An error occurred while trying to load the question. Please restart the tool to try again.`);
+            displayCriticalError(config.ERROR_MESSAGES.QUESTION_NOT_FOUND);
             return;
         }
 
@@ -336,7 +395,7 @@
                 const resultData = vetPreferenceTree[resultNodeId];
                 if (!resultData) {
                     console.error(`Error: Result node with ID "${resultNodeId}" not found in decision tree.`);
-                    displayCriticalError(`An error occurred while trying to determine the outcome. Please restart the tool.`);
+                    displayCriticalError(config.ERROR_MESSAGES.RESULT_NODE_NOT_FOUND);
                     return;
                 }
                 displayResult(resultData);
@@ -356,11 +415,11 @@
         elements.answersArea.style.display = 'none';
 
         elements.resultArea.innerHTML = `
-            <div class="tool-error-message">
-                <h2>Tool Error</h2>
+            <div class="${config.CSS_CLASSES.TOOL_ERROR_MESSAGE}">
+                <h2>${config.ERROR_MESSAGES.CRITICAL_ERROR_TITLE}</h2>
                 <p>${userMessage}</p>
             </div>`;
-        elements.resultArea.className = 'tool-result'; // Reset class to default then add error specific if needed, or ensure error message class handles all styling.
+        elements.resultArea.className = config.CSS_CLASSES.TOOL_RESULT; // Reset class to default then add error specific if needed, or ensure error message class handles all styling.
                                                      // The .tool-error-message class should handle its own styling.
         elements.resultArea.style.display = 'block';
 
@@ -384,7 +443,7 @@
         // Add "Required Documents" section if data exists.
         if (result.requiredDocuments && result.requiredDocuments.length > 0) {
             const documentsDiv = document.createElement('div');
-            documentsDiv.className = 'result-documents'; // Apply styling.
+            documentsDiv.className = config.CSS_CLASSES.RESULT_DOCUMENTS; // Apply styling.
             const h3Docs = document.createElement('h3');
             h3Docs.textContent = 'Required Documents:';
             documentsDiv.appendChild(h3Docs);
@@ -401,7 +460,7 @@
         // Add "Additional Information" section if data exists.
         if (result.additionalInfo && result.additionalInfo.length > 0) {
             const additionalInfoDiv = document.createElement('div');
-            additionalInfoDiv.className = 'result-details'; // Apply styling.
+            additionalInfoDiv.className = config.CSS_CLASSES.RESULT_DETAILS; // Apply styling.
             const h3Info = document.createElement('h3');
             h3Info.textContent = 'Additional Information:';
             additionalInfoDiv.appendChild(h3Info);
@@ -418,7 +477,7 @@
         // Add "Official Resources" (OPM Links) section if data exists.
         if (result.opmLinks && result.opmLinks.length > 0) {
             const linksDiv = document.createElement('div');
-            linksDiv.className = 'result-links'; // Apply styling.
+            linksDiv.className = config.CSS_CLASSES.RESULT_LINKS; // Apply styling.
             const h3Links = document.createElement('h3');
             h3Links.textContent = 'Official Resources:';
             linksDiv.appendChild(h3Links);
@@ -428,8 +487,8 @@
                 const a = document.createElement('a');
                 a.href = link.url;
                 a.textContent = link.text;
-                a.target = '_blank'; // Open links in a new tab.
-                a.rel = 'noopener noreferrer'; // Security best practice for external links.
+                a.target = config.LINK_ATTRIBUTES.TARGET_BLANK; // Open links in a new tab.
+                a.rel = config.LINK_ATTRIBUTES.REL_NOOPENER_NOREFERRER; // Security best practice for external links.
                 li.appendChild(a);
                 ulLinks.appendChild(li);
             });
@@ -449,7 +508,7 @@
         // This can happen if a resultOutcome ID in the tree is mistyped or refers to a non-existent node.
         if (!result) {
             console.error('Error: displayResult was called with an undefined result object.', 'Current state:', state, 'Triggering answer:', state.answers[state.currentQuestionId]);
-            displayCriticalError('An unexpected error occurred while trying to display the result. Please restart the tool.');
+            displayCriticalError(config.ERROR_MESSAGES.UNEXPECTED_RESULT_ERROR);
             return;
         }
 
@@ -468,7 +527,7 @@
         elements.resultArea.innerHTML = ''; // Clear any previous result content.
 
         // Apply a CSS class based on the result type for specific styling (e.g., eligibility color-coding).
-        elements.resultArea.className = `tool-result ${result.type}`;
+        elements.resultArea.className = `${config.CSS_CLASSES.TOOL_RESULT} ${result.type}`;
 
         // Add the main title and description for the result.
         const titleElement = document.createElement('h2');
@@ -506,9 +565,9 @@
         elements.currentStep.textContent = state.currentStep; // Update current step number display.
 
         // Update ARIA attributes for screen readers.
-        const progressContainer = document.querySelector('.tool-progress');
+        const progressContainer = document.querySelector(config.SELECTORS.TOOL_PROGRESS);
         if (progressContainer) {
-            progressContainer.setAttribute('aria-valuenow', progress);
+            progressContainer.setAttribute(config.ARIA_ATTRIBUTES.VALUENOW, progress);
         }
     }
 
@@ -516,7 +575,7 @@
     function goBack() {
         if (state.history.length > 0) {
             state.history.pop(); // Remove current
-            const previousId = state.history.length > 0 ? state.history[state.history.length - 1] : 'START';
+            const previousId = state.history.length > 0 ? state.history[state.history.length - 1] : config.INITIAL_QUESTION_ID;
             state.currentStep = Math.max(1, state.currentStep - 2); // Adjust for re-display
             displayQuestion(previousId);
         }
@@ -537,7 +596,7 @@
         elements.printButton.style.display = 'none';
 
         // Start over
-        displayQuestion('START');
+        displayQuestion(config.INITIAL_QUESTION_ID);
     }
 
     // Print results

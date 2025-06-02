@@ -2,6 +2,48 @@
 (function() {
     'use strict';
 
+    const config = {
+        HTML_SNIPPETS: {
+            FOOTER_URL: 'footer.html',
+            HEADER_URL: 'header.html',
+            NAVIGATION_URL: 'navigation.html',
+        },
+        PLACEHOLDER_IDS: {
+            FOOTER: 'footer-placeholder',
+            HEADER: 'header-placeholder',
+            NAVIGATION: 'navigation-placeholder',
+        },
+        API_URLS: {
+            GITHUB_COMMITS: 'https://api.github.com/repos/hadcomfort/veterans.github.io/commits?per_page=1',
+        },
+        LOCALES: {
+            DATE: 'en-US',
+        },
+        MESSAGES: {
+            LAST_UPDATED_ERROR: 'Could not retrieve',
+            LAST_UPDATED_LOAD_ERROR: 'Error loading date',
+        },
+        SELECTORS: {
+            MENU_TOGGLE: '#header-placeholder .menu-toggle',
+            MAIN_NAV_MENU: '#navigation-placeholder .main-navigation-menu',
+            DROPDOWN: '#navigation-placeholder .dropdown',
+            DROPDOWN_TRIGGER: 'a[aria-haspopup="true"]',
+            DROPDOWN_CONTENT: '.dropdown-content',
+        },
+        CSS_CLASSES: {
+            NAV_OPEN: 'nav-open',
+            DROPDOWN_OPEN: 'dropdown-open',
+            SCREEN_READER_ONLY: 'sr-only',
+        },
+        BREAKPOINTS: {
+            MOBILE_NAV: 768,
+        },
+        ANALYTICS: {
+            DISABLED_HOSTNAMES: ['localhost', '127.0.0.1'],
+            CONSOLE_MESSAGE: 'Analytics would initialize here',
+        }
+    };
+
     // DOM Content Loaded
     document.addEventListener('DOMContentLoaded', async function() {
         initializeYear();
@@ -40,15 +82,15 @@
         };
 
         // Load footer independently - no need to await for nav initialization
-        loadSnippet('footer.html', 'footer-placeholder').catch(error => {
+        loadSnippet(config.HTML_SNIPPETS.FOOTER_URL, config.PLACEHOLDER_IDS.FOOTER).catch(error => {
             console.error('Error loading footer.html (non-critical):', error);
         });
 
         try {
             // Wait for header and navigation to be loaded and injected
             await Promise.all([
-                loadSnippet('header.html', 'header-placeholder'),
-                loadSnippet('navigation.html', 'navigation-placeholder')
+                loadSnippet(config.HTML_SNIPPETS.HEADER_URL, config.PLACEHOLDER_IDS.HEADER),
+                loadSnippet(config.HTML_SNIPPETS.NAVIGATION_URL, config.PLACEHOLDER_IDS.NAVIGATION)
             ]);
             initializeNavigation(); // Call initializeNavigation after header and nav are loaded
         } catch (error) {
@@ -74,32 +116,32 @@
         if (lastUpdatedEl) {
             try {
                 // Replace with actual owner and repo if different
-                const response = await fetch('https://api.github.com/repos/hadcomfort/veterans.github.io/commits?per_page=1');
+                const response = await fetch(config.API_URLS.GITHUB_COMMITS);
                 if (!response.ok) {
                     throw new Error(`GitHub API error: ${response.status}`);
                 }
                 const commits = await response.json();
                 if (commits && commits.length > 0) {
                     const lastCommitDate = new Date(commits[0].commit.committer.date);
-                    lastUpdatedEl.textContent = lastCommitDate.toLocaleDateString('en-US', {
+                    lastUpdatedEl.textContent = lastCommitDate.toLocaleDateString(config.LOCALES.DATE, {
                         year: 'numeric',
                         month: 'long',
                         day: 'numeric'
                     });
                 } else {
-                    lastUpdatedEl.textContent = 'Could not retrieve';
+                    lastUpdatedEl.textContent = config.MESSAGES.LAST_UPDATED_ERROR;
                 }
             } catch (error) {
                 console.error('Error fetching last updated date:', error);
-                lastUpdatedEl.textContent = 'Error loading date';
+                lastUpdatedEl.textContent = config.MESSAGES.LAST_UPDATED_LOAD_ERROR;
             }
         }
     }
 
     // Enhanced navigation functionality
     function initializeNavigation() {
-        const menuToggle = document.querySelector('#header-placeholder .menu-toggle');
-        const mainNav = document.querySelector('#navigation-placeholder .main-navigation-menu');
+        const menuToggle = document.querySelector(config.SELECTORS.MENU_TOGGLE);
+        const mainNav = document.querySelector(config.SELECTORS.MAIN_NAV_MENU);
 
         if (!menuToggle) {
             console.error("Menu toggle button (.menu-toggle) not found within #header-placeholder.");
@@ -110,20 +152,20 @@
 
         if (menuToggle && mainNav) {
             menuToggle.addEventListener('click', function() {
-                const isExpanded = mainNav.classList.toggle('nav-open');
+                const isExpanded = mainNav.classList.toggle(config.CSS_CLASSES.NAV_OPEN);
                 this.setAttribute('aria-expanded', isExpanded);
             });
         }
 
         // Ensure dropdowns are also scoped if they are part of the loaded navigation
-        const dropdowns = document.querySelectorAll('#navigation-placeholder .dropdown');
+        const dropdowns = document.querySelectorAll(config.SELECTORS.DROPDOWN);
         dropdowns.forEach(dropdown => {
-            const trigger = dropdown.querySelector('a[aria-haspopup="true"]'); // More specific selector
-            const content = dropdown.querySelector('.dropdown-content');
+            const trigger = dropdown.querySelector(config.SELECTORS.DROPDOWN_TRIGGER); // More specific selector
+            const content = dropdown.querySelector(config.SELECTORS.DROPDOWN_CONTENT);
 
             if (trigger && content) {
                 trigger.addEventListener('click', function(e) {
-                    if (window.innerWidth <= 768) { // Mobile/touch behavior
+                    if (window.innerWidth <= config.BREAKPOINTS.MOBILE_NAV) { // Mobile/touch behavior
                         e.preventDefault(); // Prevent navigation for parent link
 
                         const isExpanded = this.getAttribute('aria-expanded') === 'true';
@@ -132,14 +174,14 @@
                         if (!isExpanded) { // If about to open this one
                             dropdowns.forEach(otherDropdown => {
                                 if (otherDropdown !== dropdown) {
-                                    otherDropdown.querySelector('a[aria-haspopup="true"]').setAttribute('aria-expanded', 'false');
-                                    otherDropdown.querySelector('.dropdown-content').classList.remove('dropdown-open');
+                                    otherDropdown.querySelector(config.SELECTORS.DROPDOWN_TRIGGER).setAttribute('aria-expanded', 'false');
+                                    otherDropdown.querySelector(config.SELECTORS.DROPDOWN_CONTENT).classList.remove(config.CSS_CLASSES.DROPDOWN_OPEN);
                                 }
                             });
                         }
 
                         this.setAttribute('aria-expanded', !isExpanded);
-                        content.classList.toggle('dropdown-open');
+                        content.classList.toggle(config.CSS_CLASSES.DROPDOWN_OPEN);
                     }
                     // Desktop hover is handled by CSS, but ensure aria-expanded is correct if JS interacts
                     // For desktop, if we want click instead of hover, logic would go here
@@ -149,22 +191,22 @@
 
         // Close menu/dropdowns when clicking outside
         document.addEventListener('click', function(event) {
-            if (window.innerWidth <= 768) {
+            if (window.innerWidth <= config.BREAKPOINTS.MOBILE_NAV) {
                 // Close mobile nav if click is outside
-                if (mainNav && mainNav.classList.contains('nav-open')) {
+                if (mainNav && mainNav.classList.contains(config.CSS_CLASSES.NAV_OPEN)) {
                     if (!mainNav.contains(event.target) && !menuToggle.contains(event.target)) {
-                        mainNav.classList.remove('nav-open');
+                        mainNav.classList.remove(config.CSS_CLASSES.NAV_OPEN);
                         menuToggle.setAttribute('aria-expanded', 'false');
                     }
                 }
 
                 // Close open dropdowns if click is outside
                 dropdowns.forEach(dropdown => {
-                    const content = dropdown.querySelector('.dropdown-content');
-                    const trigger = dropdown.querySelector('a[aria-haspopup="true"]');
-                    if (content && content.classList.contains('dropdown-open')) {
+                    const content = dropdown.querySelector(config.SELECTORS.DROPDOWN_CONTENT);
+                    const trigger = dropdown.querySelector(config.SELECTORS.DROPDOWN_TRIGGER);
+                    if (content && content.classList.contains(config.CSS_CLASSES.DROPDOWN_OPEN)) {
                         if (!dropdown.contains(event.target)) {
-                            content.classList.remove('dropdown-open');
+                            content.classList.remove(config.CSS_CLASSES.DROPDOWN_OPEN);
                             trigger.setAttribute('aria-expanded', 'false');
                         }
                     }
@@ -180,7 +222,7 @@
         announcer.setAttribute('role', 'status');
         announcer.setAttribute('aria-live', 'polite');
         announcer.setAttribute('aria-atomic', 'true');
-        announcer.className = 'sr-only';
+        announcer.className = config.CSS_CLASSES.SCREEN_READER_ONLY;
         document.body.appendChild(announcer);
 
         // Add keyboard navigation hints
@@ -198,8 +240,8 @@
     // Initialize analytics (placeholder)
     function initializeAnalytics() {
         // This would be replaced with actual analytics code
-        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
-            console.log('Analytics would initialize here');
+        if (!config.ANALYTICS.DISABLED_HOSTNAMES.includes(window.location.hostname)) {
+            console.log(config.ANALYTICS.CONSOLE_MESSAGE);
             // Example: Plausible, Umami, or similar privacy-respecting analytics
         }
     }
