@@ -9,6 +9,7 @@
         initializeNavigation();
         initializeAccessibility();
         initializeAnalytics();
+        loadHTMLSnippets(); // Added call
     });
 
     // Update current year
@@ -150,4 +151,54 @@
 
     // Utility: Screen reader only class .visually-hidden is now in style.css
 
+    // Function to load HTML snippets
+    async function loadHTMLSnippets() {
+        try {
+            const response = await fetch('header.html');
+            if (!response.ok) {
+                throw new Error(`Failed to fetch header.html: ${response.status}`);
+            }
+            const html = await response.text();
+            const placeholder = document.getElementById('header-placeholder');
+            if (placeholder) {
+                placeholder.innerHTML = html;
+            } else {
+                console.error('Placeholder #header-placeholder not found.');
+            }
+        } catch (error) {
+            console.error('Error loading header.html:', error);
+        }
+
+        try {
+            const response = await fetch('navigation.html');
+            if (!response.ok) {
+                throw new Error(`Failed to fetch navigation.html: ${response.status}`);
+            }
+            const html = await response.text();
+            const placeholder = document.getElementById('navigation-placeholder');
+            if (placeholder) {
+                placeholder.innerHTML = html;
+            } else {
+                console.error('Placeholder #navigation-placeholder not found.');
+            }
+        } catch (error) {
+            console.error('Error loading navigation.html:', error);
+        }
+
+        try {
+            const response = await fetch('footer.html');
+            if (!response.ok) {
+                throw new Error(`Failed to fetch footer.html: ${response.status}`);
+            }
+            const html = await response.text();
+            const placeholder = document.getElementById('footer-placeholder');
+            if (placeholder) {
+                placeholder.innerHTML = html;
+            } else {
+                console.error('Placeholder #footer-placeholder not found.');
+            }
+        } catch (error) {
+            console.error('Error loading footer.html:', error);
+        }
+    }
 })();
