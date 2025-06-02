@@ -317,14 +317,14 @@ section {
 }
 
 /* Feature Section Specifics */
-section.features {
+.features {
     /* Add horizontal padding to match main's horizontal padding or other sections */
     padding-left: 1rem;
     padding-right: 1rem;
 }
 /* Adjust padding for smaller screens if main's padding also changes */
 @media (max-width: 480px) {
-    section.features {
+    .features {
         padding-left: 0.75rem;
         padding-right: 0.75rem;
     }
@@ -551,7 +551,7 @@ footer {
     /* background-position: center; */
 }
 
-nav ul#main-nav {
+.main-navigation-menu {
     display: none; /* Hide nav by default on mobile */
     position: absolute;
     top: 100%; /* Position below the header */
@@ -571,21 +571,21 @@ nav ul#main-nav {
     align-items: stretch; /* Stretch items to full width */
     }
 
-nav ul#main-nav.nav-open {
+.main-navigation-menu.nav-open {
     display: flex; /* Show nav when class is applied */
     transform: translateY(0);
     opacity: 1;
 }
 
-nav ul#main-nav li {
+.main-navigation-menu li {
     width: 100%;
 }
 
-nav ul#main-nav a {
+.main-navigation-menu a {
     padding: 0.75rem 1.5rem; /* Larger tap targets */
     border-bottom: 1px solid var(--bg-tertiary);
 }
-nav ul#main-nav li:last-child a {
+.main-navigation-menu li:last-child a {
     border-bottom: none;
 }
 
@@ -648,7 +648,7 @@ nav ul#main-nav li:last-child a {
         margin-bottom: 1.5rem; /* Reduced spacing between sections */
     }
 
-    /* section.features padding is already handled by its own @media (max-width: 480px) rule */
+    /* .features padding is already handled by its own @media (max-width: 480px) rule */
 
     /* Hero further refinement */
     .hero {
@@ -692,7 +692,7 @@ nav ul#main-nav li:last-child a {
     h4 { font-size: 0.95rem; }
 
     /* Nav link font size on mobile if needed (already quite large tap targets) */
-    /* nav ul#main-nav a { font-size: 1rem; } */
+    /* .main-navigation-menu a { font-size: 1rem; } */
 
 }
 

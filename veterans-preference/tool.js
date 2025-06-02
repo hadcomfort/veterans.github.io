@@ -556,7 +556,7 @@
 /*
     function setupMenuToggle() {
         const menuToggleButton = document.querySelector('.menu-toggle');
-        const mainMenu = document.getElementById('main-menu');
+        const mainMenu = document.querySelector('.tool-main-menu');
 
         if (menuToggleButton && mainMenu) {
             menuToggleButton.addEventListener('click', function() {

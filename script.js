@@ -51,7 +51,7 @@
     // Enhanced navigation functionality
     function initializeNavigation() {
         const menuToggle = document.querySelector('.menu-toggle');
-        const mainNav = document.getElementById('main-nav'); // Use ID for main nav UL
+        const mainNav = document.querySelector('.main-navigation-menu'); // Use ID for main nav UL
 
         if (menuToggle && mainNav) {
             menuToggle.addEventListener('click', function() {

@@ -148,7 +148,7 @@
 }
 
 
-.tool-result.eligibile {
+.tool-result.eligible {
     border: 2px solid var(--success-color);
     background: #d4edda;
 }
@@ -270,7 +270,7 @@
 }
 
 /* Styles for the navigation menu container */
-header nav ul#main-menu {
+.tool-main-menu {
     display: flex; /* Default for desktop: flex layout */
     flex-direction: row;
     list-style: none;
@@ -284,7 +284,7 @@ header nav ul#main-menu {
         display: block; /* Show the hamburger button on mobile */
     }
 
-    header nav ul#main-menu {
+    .tool-main-menu {
         display: none; /* Hide the menu by default on mobile */
         flex-direction: column; /* Stack links vertically on mobile */
         width: 100%; /* Take full width */
@@ -292,35 +292,35 @@ header nav ul#main-menu {
         padding: 0.5rem 0; /* Padding for the dropdown */
     }
 
-    header nav ul#main-menu.is-open {
+    .tool-main-menu.is-open {
         display: flex; /* Show the menu when .is-open class is present */
     }
 
     /* Adjust list item styling for mobile dropdown */
-    header nav ul#main-menu li {
+    .tool-main-menu li {
         width: 100%;
         text-align: left; /* Or center, as per design */
     }
 
-    header nav ul#main-menu li a {
+    .tool-main-menu li a {
         display: block;
         padding: 0.75rem 1rem; /* Make tap targets larger */
         border-bottom: 1px solid var(--border-color); /* Separator for links */
     }
 
-    header nav ul#main-menu li:last-child a {
+    .tool-main-menu li:last-child a {
         border-bottom: none;
     }
 
     /* Ensure dropdowns within the menu also adapt if necessary */
-    header nav ul#main-menu .dropdown-content {
+    .tool-main-menu .dropdown-content {
         position: static; /* Change from absolute to static for mobile flow */
         box-shadow: none;
         border: none;
         background-color: transparent; /* Blend with parent menu background */
     }
 
-    header nav ul#main-menu .dropdown-content li a {
+    .tool-main-menu .dropdown-content li a {
         padding-left: 2rem; /* Indent sub-menu items */
         color: var(--text-secondary); /* Adjust color if needed */
     }
