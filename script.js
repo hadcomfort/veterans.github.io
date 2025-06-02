@@ -21,16 +21,30 @@
     }
 
     // Show last GitHub update
-    function initializeLastUpdated() {
+    async function initializeLastUpdated() {
         const lastUpdatedEl = document.getElementById('last-updated');
         if (lastUpdatedEl) {
-            // This would be replaced with actual GitHub API call in production
-            const lastUpdated = new Date().toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            lastUpdatedEl.textContent = lastUpdated;
+            try {
+                // Replace with actual owner and repo if different
+                const response = await fetch('https://api.github.com/repos/hadcomfort/veterans.github.io/commits?per_page=1');
+                if (!response.ok) {
+                    throw new Error(`GitHub API error: ${response.status}`);
+                }
+                const commits = await response.json();
+                if (commits && commits.length > 0) {
+                    const lastCommitDate = new Date(commits[0].commit.committer.date);
+                    lastUpdatedEl.textContent = lastCommitDate.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                } else {
+                    lastUpdatedEl.textContent = 'Could not retrieve';
+                }
+            } catch (error) {
+                console.error('Error fetching last updated date:', error);
+                lastUpdatedEl.textContent = 'Error loading date';
+            }
         }
     }
 
