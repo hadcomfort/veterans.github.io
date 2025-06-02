@@ -184,6 +184,10 @@ nav a[aria-current="page"] {
     color: var(--primary-color);
 }
 
+#navigation-placeholder > nav {
+    position: relative;
+}
+
 /* Menu Toggle Button (Hamburger) */
 .menu-toggle {
     display: none; /* Hidden by default, shown in media query */
@@ -566,7 +570,7 @@ footer {
     transition: transform var(--transition-normal), opacity var(--transition-normal);
     transform: translateY(-10px); /* Start slightly above for transition */
     opacity: 0;
-    z-index: 1000; /* Ensure it's above content but below sticky header if toggle is outside */
+    z-index: 1005; /* Ensure it's above content but below sticky header if toggle is outside */
     flex-direction: column; /* Stack items vertically */
     align-items: stretch; /* Stretch items to full width */
     }
