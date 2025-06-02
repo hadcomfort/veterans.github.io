@@ -923,6 +923,9 @@
     }
 
     // Initialize when DOM is ready
-    document.addEventListener('DOMContentLoaded', init);
-
+    if (document.readyState === 'interactive' || document.readyState === 'complete') {
+        init();
+    } else {
+        document.addEventListener('DOMContentLoaded', init);
+    }
 })();
