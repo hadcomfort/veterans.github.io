@@ -1,0 +1,12 @@
+---
+layout: default
+---
+<article>
+    {% include breadcrumb.html %}
+    <h1>{{ page.title }}</h1>
+    {{ content }}
+    <aside class="citation">
+        <h3>Source Reference</h3>
+        <p>This information is based on hrdocs.txt, specifically the content identified as {{ page.appendix_letter | default: "the relevant appendix" }}.</p>
+    </aside>
+</article>
