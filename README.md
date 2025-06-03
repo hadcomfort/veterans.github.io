@@ -5,7 +5,7 @@
 ---
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![GitHub Pages](https://img.shields.io/badge/View_Site-Live-brightgreen)](https://veterans-info.github.io/)
+[![GitHub Pages](https://img.shields.io/badge/View_Site-Live-brightgreen)](https://hadcomfort.github.io/)
 [![Accessibility](https://img.shields.io/badge/Accessibility-WCAG_2.1_AA-orange)](https://www.w3.org/WAI/WCAG21/quickref/)
 
 Welcome to the **Veterans' Preference Guide** repository! This project powers a comprehensive informational website dedicated to helping U.S. military veterans, their families, and HR professionals understand and navigate Veterans' Preference in federal employment.
@@ -85,7 +85,7 @@ Veterans' Preference is a system of laws passed by Congress that provides eligib
 </p>
 
 <p align="center">
-  <strong>Visit the live site:</strong> <a href="https://veterans-info.github.io/">veterans-info.github.io</a>
+  <strong>Visit the live site:</strong> <a href="https://hadcomfort.github.io/">hadcomfort.github.io</a>
 </p>
 
 ---
@@ -132,13 +132,13 @@ While all information is carefully researched and based on official OPM guidance
 Your input helps us improve this resource for the veteran community!
 
 ### 🐛 Found an Issue?
-- [Open an issue](https://github.com/veterans-info/veterans-info.github.io/issues) for bugs or inaccuracies
+- [Open an issue](https://github.com/hadcomfort/veterans.github.io/issues) for bugs or inaccuracies
 - Include specific page/section references when possible
 - Screenshots are helpful for visual issues
 
 ### 💡 Have a Suggestion?
-- Feature requests welcome via [issues](https://github.com/veterans-info/veterans-info.github.io/issues)
-- Email general feedback to: feedback@veterans-info.github.io
+- Feature requests welcome via [issues](https://github.com/hadcomfort/veterans.github.io/issues)
+- Email general feedback to: feedback@hadcomfort.github.io
 
 ### 📝 Contributing Guidelines
 While direct code contributions are limited due to the sensitive nature of maintaining accuracy with official sources, we welcome:
@@ -146,8 +146,6 @@ While direct code contributions are limited due to the sensitive nature of maint
 - Accessibility improvements
 - User experience enhancements
 - Additional FAQ suggestions
-
-Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting.
 
 ---
 
