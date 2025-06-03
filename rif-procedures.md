@@ -199,5 +199,3 @@ Board as discussed in Chapter 3.
 Time line of Veterans Preference in the Federal Civil Service
 1876
 * First VP in reduction in force (RIF) law
-
-source_citation: "Content derived from hrdocs.txt, Chapter/Section on RIF."
