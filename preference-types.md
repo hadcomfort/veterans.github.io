@@ -2,7 +2,6 @@
 layout: page
 title: Types of Veterans' Preference
 permalink: /preference-types/
-source_citation: "Content derived from hrdocs.txt, Chapter/Section on Preference Types."
 ---
 
 ## Types of Preference
