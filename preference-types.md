@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Preference Types
-permalink: /veterans-preference/preference-types/
+permalink: /preference-types/
 ---
 
 To receive preference, a veteran must have been discharged or released from active duty in the Armed Forces

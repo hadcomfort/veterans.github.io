@@ -1,13 +1,30 @@
 ---
-layout: default # Or a specific homepage layout if created
-title: Home
-description: Your comprehensive guide to veterans information on benefits, healthcare, education, employment, and more.
-# Add other SEO/OG data if needed, though jekyll-seo-tag handles much
+layout: page
+title: Veterans' Preference Guide
+permalink: /
 ---
 
-This document, 'VET GUIDE FOR HR PROFESSIONALS' from OPM.gov, serves as a comprehensive guide for Human Resources professionals regarding U.S. veterans' services and preferences in Federal employment. It details the policies and procedures administered by the Office of Personnel Management (OPM) under titles 5 and 38 of the United States Code. Key areas covered include:
-*   **Veterans' Preference:** Explanation of why preference is given, when it applies, different types (0-point, 5-point, 10-point including derived preferences), and its application in appointments, competitive examinations (including Category Rating and Rule of Three), and Reduction in Force (RIF).
-*   **Special Provisions & Appointing Authorities:** Details on the Veterans Opportunity to Work (VOW) Act, crediting of experience, waivers for qualifications, excepted service employment, and special appointing authorities like the Veterans Recruitment Appointment (VRA) and provisions for disabled veterans.
-*   **Rights and Protections:** Information on restoration rights after uniformed service, service credit, appeal rights, and protections against adverse actions.
-*   **Administrative Guidance:** Procedures for adjudicating claims, handling late applications, and understanding the impact of military retirement on benefits.
-The guide also includes appendices that list qualifying wars, campaigns, and expeditions; types of uniformed service eligible for preference; officer personnel pay grades; and a historical overview of Veterans' Preference legislation. Its primary aim is to equip HR professionals with the necessary knowledge to correctly apply laws and regulations related to veteran employment in the Federal sector.
+The Office of Personnel Management (OPM) administers entitlement to veterans' preference in
+employment under title 5, United States Code, and oversees other statutory employment requirements in
+titles 5 and 38. (Title 38 also governs Veterans' entitlement to benefits administered by the Department of
+Veterans Affairs (VA).)
+Both title 5 and title 38 use many of the same terms, but in different ways. For example, service during a
+"war" is used to determine entitlement to Veterans' preference and service credit under title 5. OPM has
+always interpreted this to mean a war declared by Congress. But title 38 defines "period of war" to
+include many non-declared wars, including Korea, Vietnam, and the Persian Gulf. Such conflicts entitle a
+veteran to VA benefits under title 38, but not necessarily to preference or service credit under title 5.
+Thus it is critically important to use the correct definitions in determining eligibility for specific rights and
+benefits in employment.
+For additional information, including the complete text of the laws and regulations on Veterans' rights,
+consult the references cited.
+
+## Navigating this Guide
+
+Use the links below to find specific information about Veterans' Preference:
+
+*   [Eligibility](/eligibility/)
+*   [Preference Types](/preference-types/)
+*   [RIF Procedures](/rif-procedures/)
+*   [Special Authorities](/special-authorities/)
+*   [FAQs](/faq/)
+*   [Appendices](/appendices/)

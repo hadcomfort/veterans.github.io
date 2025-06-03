@@ -22,4 +22,4 @@ defaults:
 collections:
   appendices:
     output: true
-    permalink: /veterans-preference/appendices/:path/
+    permalink: /appendices/:path/
