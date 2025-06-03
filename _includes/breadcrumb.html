@@ -1,7 +1,13 @@
 <nav aria-label="Breadcrumb" class="usa-breadcrumb">
   <ol class="usa-breadcrumb__list">
     <li class="usa-breadcrumb__list-item">
-      <span>Breadcrumbs will go here.</span>
+      <a href="{{ "/" | relative_url }}" class="usa-breadcrumb__link">Home</a>
     </li>
+    <!-- Additional breadcrumb items will be added dynamically by Jekyll or JavaScript -->
+    {% if page.url != "/" %}
+    <li class="usa-breadcrumb__list-item usa-current" aria-current="page">
+      <span>{{ page.title }}</span>
+    </li>
+    {% endif %}
   </ol>
 </nav>
