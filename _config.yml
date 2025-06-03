@@ -1,1 +1,25 @@
+title: General Veterans Information Portal
+description: Your comprehensive guide to veterans information on benefits, healthcare, education, employment, and more.
 theme: jekyll-theme-minimal
+url: "https://veterans-info.github.io" # Your GitHub Pages URL
+baseurl: "" # Usually empty for project pages, or /repo-name for user/org pages
+
+# Optional: Add default front matter for pages/collections
+defaults:
+  - scope:
+      path: ""
+      type: "pages" # This will apply to all .md files that are not posts or in collections
+    values:
+      layout: "page"
+  - scope:
+      path: ""
+      type: "appendices" # Assuming 'appendices' is the collection name
+    values:
+      layout: "collection_item"
+      # Add other defaults like category if needed
+
+# Collections setup
+collections:
+  appendices:
+    output: true
+    permalink: /veterans-preference/appendices/:path/
