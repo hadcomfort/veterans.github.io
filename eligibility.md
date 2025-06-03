@@ -2,7 +2,6 @@
 layout: page
 title: Eligibility for Veterans' Preference
 permalink: /eligibility/
-source_citation: "Content derived from hrdocs.txt, sections related to Veterans' Preference in Appointments and Eligibility."
 ---
 
 ## When Preference Applies
