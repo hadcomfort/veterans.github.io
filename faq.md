@@ -164,5 +164,3 @@ No. VEOA candidates are considered along with agency candidates, and under the s
 
 No. Whether or not to consider someone who is still in the military is entirely at the discretion of the employing agency. By law, a person on military duty cannot be appointed to a civilian position (unless on terminal leave), but he or she can certainly be considered should the agency wish to do so. The determining factor, here, should be whether the person will be available when the agency needs to have the job filled.
 </details>
-
-source_citation: "Content derived from Q&A sections in hrdocs.txt."
