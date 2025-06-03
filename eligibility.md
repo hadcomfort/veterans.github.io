@@ -1,46 +1,57 @@
 ---
 layout: page
-title: Eligibility Requirements
+title: Eligibility
 permalink: /eligibility/
 ---
 
-## Why Preference is Given
-Since the time of the Civil War, veterans of the Armed Forces have been given some degree of preference in
-appointments to Federal jobs. Recognizing their sacrifice, Congress enacted laws to prevent veterans seeking
-Federal employment from being penalized for their time in military service. Veterans' preference recognizes
-the economic loss suffered by citizens who have served their country in uniform, restores veterans to a
-favorable competitive position for Government employment, and acknowledges the larger obligation owed to
-disabled veterans.
-Veterans' preference in its present form comes from the Veterans' Preference Act of 1944, as amended, and is
-now codified in various provisions of title 5, United States Code. By law, veterans who are disabled or who
-served on active duty in the Armed Forces during certain specified time periods or in military campaigns are
-entitled to preference over others in hiring from competitive lists of eligibles and also in retention during
-reductions in force.
-In addition to receiving preference in competitive appointments, veterans may be considered for special
-noncompetitive appointments for which only they are eligible. See Chapter 4.
-
 ## When Preference Applies
-Preference in hiring applies to permanent and temporary positions in the competitive and excepted services
-of the executive branch. Preference does not apply to positions in the Senior Executive Service or to
-executive branch positions for which Senate confirmation is required. The legislative and judicial branches of
-the Federal Government also are exempt from the Veterans' Preference Act unless the positions are in the
-competitive service (Government Printing Office, for example) or have been made subject to the Act by
-another law.
-Preference applies in hiring from civil service examinations conducted by the Office of Personnel
-Management (OPM) and agencies under delegated examining authority, for most excepted service jobs
-including Veterans Recruitment Appointments (VRA), and when agencies make temporary, term, and
-overseas limited appointments. Veterans' preference does not apply to promotion, reassignment, change to
-lower grade, transfer or reinstatement.
-Veterans' preference does not require an agency to use any particular appointment process. Agencies have
-broad authority under law to hire from any appropriate source of eligibles including special appointing
-authorities. An agency may consider candidates already in the civil service from an agency-developed merit
-promotion list or it may reassign a current employee, transfer an employee from another agency, or reinstate
-a former Federal employee. In addition, agencies are required to give priority to displaced employees before
-using civil service examinations and similar hiring methods.
-Civil service examination: 5 U.S.C. 3304-3330, 5 CFR Part 332, OPM Delegation Agreements
-with individual agencies, OPM Examining Handbook, OPM Delegated Examining Operations
-Handbook; Excepted service appointments, including VRA's: 5 U.S.C. 3320; 5 CFR Part 302;
-Temporary and term employment: 5 CFR Parts 316 and 333; Overseas limited employment:
-5 CFR Part 301; Career Transition Program: 5 CFR Part 330, Subparts F and G.
 
-Based on the OPM Vet Guide for HR Professionals (Chapter: Veterans' Preference in Appointments).
+Preference in hiring applies to permanent and temporary positions in the competitive and excepted services of the executive branch. Preference does not apply to positions in the Senior Executive Service or to executive branch positions for which Senate confirmation is required. The legislative and judicial branches of the Federal Government also are exempt from the Veterans' Preference Act unless the positions are in the competitive service (Government Printing Office, for example) or have been made subject to the Act by another law.
+
+Preference applies in hiring from civil service examinations conducted by the Office of Personnel Management (OPM) and agencies under delegated examining authority, for most excepted service jobs including Veterans Recruitment Appointments (VRA), and when agencies make temporary, term, and overseas limited appointments. Veterans' preference does not apply to promotion, reassignment, change to lower grade, transfer or reinstatement.
+
+Veterans' preference does not require an agency to use any particular appointment process. Agencies have broad authority under law to hire from any appropriate source of eligibles including special appointing authorities. An agency may consider candidates already in the civil service from an agency-developed merit promotion list or it may reassign a current employee, transfer an employee from another agency, or reinstate a former Federal employee. In addition, agencies are required to give priority to displaced employees before using civil service examinations and similar hiring methods.
+
+Civil service examination: 5 U.S.C. 3304-3330, 5 CFR Part 332, OPM Delegation Agreements with individual agencies, OPM Examining Handbook, OPM Delegated Examining Operations Handbook; Excepted service appointments, including VRA's: 5 U.S.C. 3320; 5 CFR Part 302; Temporary and term employment: 5 CFR Parts 316 and 333; Overseas limited employment: 5 CFR Part 301; Career Transition Program: 5 CFR Part 330, Subparts F and G.
+
+## Types of Preference
+
+To receive preference, a veteran must have been discharged or released from active duty in the Armed Forces under honorable conditions (i.e., with an honorable or general discharge). As defined in 5 U.S.C. 2101(2), "Armed Forces" means the Army, Navy, Air Force, Marine Corps and Coast Guard. The veteran must also be eligible under one of the preference categories below (also shown on the Standard Form (SF) 50, Notification of Personnel Action).
+
+Military retirees at the rank of major, lieutenant commander, or higher are not eligible for preference in appointment unless they are disabled veterans. (This does not apply to Reservists who will not begin drawing military retired pay until age 60.)
+
+For non-disabled users, active duty for training by National Guard or Reserve soldiers does not qualify as "active duty" for preference.
+
+For disabled veterans, active duty includes training service in the Reserves or National Guard, per the Merit Systems Protection Board decision in Hesse v. Department of the Army, 104 M.S.P.R.647(2007).
+
+For purposes of this chapter and 5 U.S.C. 2108, "war" means only those armed conflicts declared by Congress as war and includes World War II, which covers the period from December 7, 1941, to April 28, 1952.
+
+When applying for Federal jobs, eligible veterans should claim preference on their application or resume. Applicants claiming 10-point preference must complete Standard Form (SF) 15, Application for 10-Point Veteran Preference, and submit the requested documentation.
+
+The following preference categories and points are based on 5 U.S.C. 2108 and 3309 as modified by a length of service requirement in 38 U.S.C. 5303A(d).
+
+## Adjudication of Veterans' Preference Claims
+
+Agencies are responsible for adjudicating all preference claims except claims for preference based on common-law marriage, which should be sent to the Office of Personnel Management (OPM), Office of the General Counsel, 1900 E. St. NW, Washington, DC 20415.
+
+5 U.S.C. 3309, 3313 and 5 CFR 332.401, 337.101
+
+## Crediting Experience of Preference Eligibles
+
+In evaluating experience, an examining office must credit a preference eligible's Armed Forces service as an extension of the work performed immediately prior to the service, or on the basis of the actual duties performed in the service, or as a combination of both, whichever would most benefit the preference eligible. The examining office must also give all applicants credit for job-related experience, paid and unpaid, including experience in religious, civic, welfare, service and organizational activities.
+
+5 U.S.C. 3311, 5 CFR 337.101
+
+## Physical Qualifications
+
+In determining qualifications, agencies must waive a medical standard or physical requirement when there is sufficient evidence that the employee or applicant, with or without reasonable accommodation, can perform the essential duties of the position without endangering the health and safety of the individual or others. Special provisions apply to the proposed disqualification of a preference eligible with a 30 percent or more compensable disability. See Disqualification of 30 Percent or more Disabled Veterans below.
+
+5 U.S.C. 3312, 5 CFR Part 339.204
+
+## Age Qualifications
+
+On July 2, 2008, the Merit Systems Protection Board (Board) issued a final decision in Robert P. Isabella v. Department of State and Office of Personnel Management, 2008 M.S.P.B. 146, that affects preference eligibles who apply for federal positions having a maximum entry-age restriction. The Board decided that the agency's failure to waive the maximum entry-age requirements for Mr. Isabella, a preference eligible veteran, violated his rights under the Veteran Employment Opportunities Act of 1998 (VEOA) because there was no demonstration that a maximum entry-age was essential to the performance of the position.
+
+Based on the Board's decision in Isabella, qualified preference eligibles may now apply and be considered for vacancies regardless of whether they meet the maximum age requirements identified at 5 U.S.C. 3307. In order to determine whether it must waive a maximum entry-age requirement, an agency must first analyze the affected position to determine whether age is essential to the performance of the position. If the agency decides age is not essential to the position, then it must waive the maximum entry-age requirement for veterans' preference eligible applicants. In instances where the maximum entry-age is waived, the corresponding mandatory retirement age for these individuals will also be higher because it will be reached after 20 years of Law Enforcement Officer (LEO) service for the entitlement to an immediate enhanced annuity.
+
+The same principles set forth above would apply to appointments to other types of positions for which the setting of maximum entry ages are authorized under 5 U.S.C. § 3307. These types of positions are: (1) firefighters, (2) air traffic controllers, (3) United States Park police, (4) nuclear materials couriers, and (5) customs and border patrol officers (subject to the Federal Employees Retirement System, 5 U.S.C. § 8401 et seq. only).
