@@ -1,4 +1,7 @@
 ---
+# Only an empty front matter is required for SCSS processing
 ---
 
-@import "main";
+@import "{{ site.theme }}";
+
+// Your custom styles/overrides will go here
