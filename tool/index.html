@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Veterans' Preference Eligibility Tool</title>
+    <link rel="stylesheet" href="tool-styles.css">
+</head>
+<body>
+    <header>
+        <h1>Veterans' Preference Eligibility Tool</h1>
+    </header>
+    <main>
+        <div class="disclaimer">
+            <p><strong>Disclaimer:</strong> This interactive tool is designed to help you determine potential eligibility for Veterans' Preference. Content is based on hrdocs.txt. This tool provides guidance only and is not an official determination of eligibility. Please consult with an HR professional or refer to the official OPM VetGuide for HR Professionals for authoritative information.</p>
+        </div>
+
+        <form id="preferenceForm">
+            <div class="question-group">
+                <p>1. Were you discharged or released from active duty in the Armed Forces under honorable conditions (i.e., with an honorable or general discharge)?</p>
+                <label><input type="radio" name="honorableDischarge" value="yes"> Yes</label>
+                <label><input type="radio" name="honorableDischarge" value="no"> No</label>
+            </div>
+
+            <div class="question-group">
+                <p>2. Are you an active duty service member expected to be discharged or released from active duty service under honorable conditions within 120 days (and can you provide a certification per the VOW Act)?</p>
+                <label><input type="radio" name="vowAct" value="yes"> Yes</label>
+                <label><input type="radio" name="vowAct" value="no"> No</label>
+            </div>
+
+            <div class="question-group">
+                <p>3. Do you have a present service-connected disability rating issued by the VA or your branch of service?</p>
+                <label><input type="radio" name="serviceConnectedDisability" value="yes"> Yes</label>
+                <label><input type="radio" name="serviceConnectedDisability" value="no"> No</label>
+            </div>
+
+            <!-- More questions will be added here by JavaScript or directly -->
+
+            <button type="button" onclick="determineEligibility()">Determine Eligibility</button>
+        </form>
+
+        <div id="results">
+            <h2>Potential Eligibility:</h2>
+            <p id="eligibilityResult"></p>
+        </div>
+    </main>
+    <footer>
+        <p>Refer to hrdocs.txt for detailed information.</p>
+    </footer>
+    <script src="tool.js"></script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+body {
+    font-family: sans-serif;
+    line-height: 1.6;
+    margin: 20px;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    padding: 1rem 0;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    margin: 0;
+}
+
+main {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.disclaimer {
+    background-color: #fffeb3;
+    border: 1px solid #f0e68c;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.disclaimer p {
+    margin: 0;
+}
+
+.question-group {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.question-group p {
+    margin-top: 0;
+    font-weight: bold;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+input[type="radio"] {
+    margin-right: 8px;
+}
+
+button {
+    display: block;
+    background-color: #333;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 20px;
+}
+
+button:hover {
+    background-color: #555;
+}
+
+#results {
+    margin-top: 30px;
+    padding: 15px;
+    background-color: #e9f7fd;
+    border: 1px solid #b3e0f2;
+    border-radius: 5px;
+}
+
+#results h2 {
+    margin-top: 0;
+    color: #333;
+}
+
+#eligibilityResult {
+    font-weight: bold;
+}
+
+footer {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 0.9em;
+    color: #666;
+}
