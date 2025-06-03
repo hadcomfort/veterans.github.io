@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Special Appointing Authorities for Veterans
-permalink: /veterans-preference/special-authorities/
+permalink: /special-authorities/
 ---
 
 ## Veterans Recruitment Appointment (VRA) Authority

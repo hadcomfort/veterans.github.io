@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Veterans' Preference in RIF Procedures
-permalink: /veterans-preference/rif-procedures/
+permalink: /rif-procedures/
 ---
 
 Veterans have advantages over nonveterans in a reduction in force (RIF). Also, special provisions apply in

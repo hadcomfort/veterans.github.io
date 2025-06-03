@@ -1,7 +1,7 @@
 ---
 layout: page
 title: Eligibility Requirements
-permalink: /veterans-preference/eligibility/
+permalink: /eligibility/
 ---
 
 ## Why Preference is Given
