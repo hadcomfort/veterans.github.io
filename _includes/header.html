@@ -1,0 +1,27 @@
+<header class="usa-header usa-header--basic">
+  <div class="usa-nav-container">
+    <div class="usa-navbar">
+      <div class="usa-logo" id="basic-logo">
+        <em class="usa-logo__text">
+          <a href="{{ "/" | relative_url }}" title="Home" aria-label="Home">
+            <img src="{{ '/assets/images/logo.svg' | relative_url }}" alt="Site Logo" style="height: 32px; width: 32px; margin-right: 5px;">
+            VET GUIDE FOR HR PROFESSIONALS
+          </a>
+        </em>
+      </div>
+      <button class="usa-menu-btn">Menu</button>
+    </div>
+    <nav aria-label="Primary navigation" class="usa-nav">
+      {% include navigation.html %}
+    </nav>
+  </div>
+  <div class="usa-banner">
+    <div class="usa-accordion">
+      <header class="usa-banner__header">
+        <div class="usa-banner__inner">
+          <p>OPM.gov / Policy / Veterans Services / Vet Guide for HR Professionals</p>
+        </div>
+      </header>
+    </div>
+  </div>
+</header>
