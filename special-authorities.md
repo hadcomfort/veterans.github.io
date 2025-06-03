@@ -2,6 +2,7 @@
 layout: page
 title: Special Appointing Authorities for Veterans
 permalink: /special-authorities/
+source_citation: "Content derived from hrdocs.txt, Chapter/Section on Special Appointing Authorities."
 ---
 
 ## Special Appointing Authorities for Veterans
