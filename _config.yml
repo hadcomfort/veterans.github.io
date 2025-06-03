@@ -1,7 +1,7 @@
-title: General Veterans Information Portal
-description: Your comprehensive guide to veterans information on benefits, healthcare, education, employment, and more.
+title: Veterans Preference Interactive Guide
+description: An interactive guide to understanding Veterans' Preference in federal hiring.
 theme: jekyll-theme-minimal
-url: "https://veterans-info.github.io" # Your GitHub Pages URL
+url: "" # Your GitHub Pages URL
 baseurl: "" # Usually empty for project pages, or /repo-name for user/org pages
 
 # Optional: Add default front matter for pages/collections
@@ -22,4 +22,4 @@ defaults:
 collections:
   appendices:
     output: true
-    permalink: /appendices/:path/
+    permalink: /appendices/:name/
