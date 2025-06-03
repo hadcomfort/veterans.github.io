@@ -22,9 +22,9 @@ consult the references cited.
 
 Use the links below to find specific information about Veterans' Preference:
 
-*   [Eligibility](/eligibility/)
-*   [Preference Types](/preference-types/)
-*   [RIF Procedures](/rif-procedures/)
-*   [Special Authorities](/special-authorities/)
-*   [FAQs](/faq/)
-*   [Appendices](/appendices/)
+*   [Eligibility]({{ '/eligibility/' | relative_url }})
+*   [Preference Types]({{ '/preference-types/' | relative_url }})
+*   [RIF Procedures]({{ '/rif-procedures/' | relative_url }})
+*   [Special Authorities]({{ '/special-authorities/' | relative_url }})
+*   [FAQs]({{ '/faq/' | relative_url }})
+*   [Appendices]({{ '/appendices/' | relative_url }})
